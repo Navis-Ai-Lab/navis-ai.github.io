@@ -1,270 +1,1297 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Navis AI Lab – Coming Soon</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Mono:ital,wght@0,300;1,300&display=swap" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Navis AI — Sail Your AI Journey</title>
+    <style>
+        *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
 
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        /* ─── THEME TOKENS ─── */
+        :root {
+            --black: #0a0a0a;
+            --white: #f5f5f0;
+            --gray-mid: #888880;
 
-    :root {
-      --bg: #000000;
-      --accent: #ffffff;
-      --mid: #888888;
-      --dim: #333333;
-      --text: #e0e0e0;
-      --font-display: 'Syne', sans-serif;
-      --font-mono: 'DM Mono', monospace;
-    }
+            /* Nav */
+            --nav-bg: rgba(245,245,240,0.97);
+            --nav-border: rgba(10,10,10,0.08);
 
-    html, body {
-      min-height: 100%;
-      width: 100%;
-      overflow-x: hidden;
-    }
+            /* Hero grid lines */
+            --grid-line: rgba(10,10,10,0.04);
 
-    body {
-      background-color: var(--bg);
-      color: var(--text);
-      font-family: var(--font-display);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 100svh;
-      padding: clamp(1.5rem, 5vw, 4rem);
-      position: relative;
-    }
+            /*
+             * --inv-XX : transparencies for "inverted" sections
+             *   (about / process / footer = dark bg in light mode, light bg in dark mode)
+             */
+            --inv-08: rgba(245,245,240,0.08);
+            --inv-12: rgba(245,245,240,0.12);
+            --inv-25: rgba(245,245,240,0.25);
+            --inv-30: rgba(245,245,240,0.30);
+            --inv-35: rgba(245,245,240,0.35);
+            --inv-45: rgba(245,245,240,0.45);
+            --inv-50: rgba(245,245,240,0.50);
+            --inv-55: rgba(245,245,240,0.55);
+            --inv-60: rgba(245,245,240,0.60);
 
-    /* ── Background grid ── */
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background-image:
-        linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
-      background-size: 60px 60px;
-      pointer-events: none;
-      z-index: 0;
-    }
+            /* --norm-XX : transparencies for "normal" sections (hero / services / cta) */
+            --norm-18: rgba(10,10,10,0.18);
 
-    /* ── Subtle radial glow center ── */
-    body::after {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background: radial-gradient(ellipse 60% 50% at 50% 50%, rgba(255,255,255,0.04) 0%, transparent 70%);
-      pointer-events: none;
-      z-index: 0;
-    }
+            /* Specific elements */
+            --card-desc: #555550;
+            --card-hover-tag-border: rgba(245,245,240,0.25);
+            --card-hover-tag-color:  rgba(245,245,240,0.50);
+            --cta-body: #555550;
+        }
 
-    /* ── Main container ── */
-    .container {
-      position: relative;
-      z-index: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
-      max-width: 680px;
-      width: 100%;
-      gap: clamp(1.2rem, 3vw, 1.8rem);
-    }
+        /* ─── DARK MODE : swap black ↔ white, flip all transparencies ─── */
+        html.dark {
+            --black: #f5f5f0;
+            --white: #0a0a0a;
+            --gray-mid: #777770;
 
-    /* ── Logo ── */
-    .logo-wrap {
-      opacity: 0;
-      animation: fadeDown 0.8s ease forwards 0.2s;
-    }
-    .logo-wrap img {
-      width: clamp(120px, 30vw, 180px);
-      height: auto;
-      filter: drop-shadow(0 0 12px rgba(255,255,255,0.08));
-    }
+            --nav-bg: rgba(10,10,10,0.98);
+            --nav-border: rgba(245,245,240,0.08);
+            --grid-line: rgba(245,245,240,0.04);
 
-    /* ── Tag ── */
-    .tag {
-      font-family: var(--font-mono);
-      font-size: clamp(0.58rem, 1.8vw, 0.72rem);
-      letter-spacing: 0.22em;
-      color: var(--mid);
-      text-transform: uppercase;
-      padding: 0.35em 1.1em;
-      border: 1px solid var(--dim);
-      border-radius: 100px;
-      background: rgba(255,255,255,0.02);
-      opacity: 0;
-      animation: fadeDown 0.8s ease forwards 0.4s;
-    }
+            --inv-08: rgba(10,10,10,0.08);
+            --inv-12: rgba(10,10,10,0.12);
+            --inv-25: rgba(10,10,10,0.25);
+            --inv-30: rgba(10,10,10,0.30);
+            --inv-35: rgba(10,10,10,0.35);
+            --inv-45: rgba(10,10,10,0.45);
+            --inv-50: rgba(10,10,10,0.50);
+            --inv-55: rgba(10,10,10,0.55);
+            --inv-60: rgba(10,10,10,0.60);
 
-    /* ── Title ── */
-    h1 {
-      font-size: clamp(2.8rem, 12vw, 6rem);
-      font-weight: 800;
-      line-height: 0.95;
-      letter-spacing: -0.03em;
-      color: #ffffff;
-      opacity: 0;
-      animation: fadeUp 0.9s ease forwards 0.6s;
-    }
+            --norm-18: rgba(245,245,240,0.18);
 
-    /* ── Thin horizontal rule ── */
-    .divider {
-      width: clamp(40px, 12vw, 100px);
-      height: 1px;
-      background: linear-gradient(90deg, transparent, var(--mid), transparent);
-      opacity: 0;
-      animation: fadeUp 0.8s ease forwards 0.8s;
-    }
+            --card-desc: #aaaaa8;
+            --card-hover-tag-border: rgba(10,10,10,0.25);
+            --card-hover-tag-color:  rgba(10,10,10,0.50);
+            --cta-body: #aaaaa8;
+        }
 
-    /* ── Slogan ── */
-    .slogan {
-      font-family: var(--font-mono);
-      font-style: italic;
-      font-weight: 300;
-      font-size: clamp(0.82rem, 2.8vw, 1.05rem);
-      color: var(--mid);
-      line-height: 1.7;
-      opacity: 0;
-      animation: fadeUp 0.8s ease forwards 1s;
-    }
-    .slogan .emoji { font-style: normal; }
-    .slogan strong {
-      color: #ffffff;
-      font-weight: 300;
-    }
+        html { scroll-behavior: smooth; }
 
-    /* ── Contact button ── */
-    .btn-contact {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.6em;
-      font-family: var(--font-mono);
-      font-size: clamp(0.65rem, 2vw, 0.78rem);
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      text-decoration: none;
-      color: #000000;
-      background: #ffffff;
-      padding: 0.75em 1.8em;
-      border-radius: 4px;
-      border: 1px solid #ffffff;
-      transition: background 0.2s ease, color 0.2s ease;
-      opacity: 0;
-      animation: fadeUp 0.8s ease forwards 1.2s;
-    }
-    .btn-contact:hover {
-      background: transparent;
-      color: #ffffff;
-    }
-    .btn-contact svg {
-      width: 14px;
-      height: 14px;
-      flex-shrink: 0;
-    }
+        body {
+            font-family: 'Georgia', serif;
+            background: var(--white);
+            color: var(--black);
+            overflow-x: hidden;
+            transition: background-color 0.45s ease, color 0.45s ease;
+        }
 
-    /* ── Status ── */
-    .status {
-      display: flex;
-      align-items: center;
-      gap: 0.6em;
-      font-family: var(--font-mono);
-      font-size: clamp(0.58rem, 1.8vw, 0.68rem);
-      letter-spacing: 0.15em;
-      color: var(--dim);
-      text-transform: uppercase;
-      opacity: 0;
-      animation: fadeUp 0.8s ease forwards 1.4s;
-    }
-    .status-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: var(--mid);
-      animation: pulse 2.5s ease-in-out infinite;
-    }
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50%       { opacity: 0.25; }
-    }
+        /* ─── NAV ─── */
+        nav {
+            position: fixed;
+            top: 0; width: 100%;
+            z-index: 100;
+            padding: 1.5rem 5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--nav-bg);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--nav-border);
+            transition: padding 0.3s ease, background-color 0.45s ease, border-color 0.45s ease;
+        }
 
-    /* ── Footer ── */
-    footer {
-      position: fixed;
-      bottom: clamp(1rem, 3vw, 1.5rem);
-      left: 0; right: 0;
-      text-align: center;
-      font-family: var(--font-mono);
-      font-size: clamp(0.52rem, 1.4vw, 0.62rem);
-      color: var(--dim);
-      letter-spacing: 0.1em;
-      z-index: 1;
-      opacity: 0;
-      animation: fadeUp 0.8s ease forwards 1.6s;
-    }
+        nav.scrolled { padding: 1rem 5rem; }
 
-    /* ── Keyframes ── */
-    @keyframes fadeDown {
-      from { opacity: 0; transform: translateY(-14px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(18px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-decoration: none;
+            color: var(--black);
+            transition: color 0.45s ease;
+        }
 
-    @media (max-width: 480px) {
-      h1 { letter-spacing: -0.04em; }
-      .btn-contact { width: 100%; justify-content: center; }
-    }
-  </style>
+        .nav-logo-img {
+            width: 44px; height: 44px;
+            display: block;
+        }
+
+        /* Light mode: use dedicated light logo */
+        html:not(.dark) .nav-logo-img,
+        html:not(.dark) .hero-logo img {
+            content: url('navis-logo-light.png');
+        }
+
+        .nav-brand {
+            font-size: 1.1rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 2.5rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--black);
+            font-size: 0.8rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            position: relative;
+            padding-bottom: 3px;
+            font-family: 'Arial', sans-serif;
+            transition: color 0.45s ease;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0;
+            width: 0; height: 1px;
+            background: var(--black);
+            transition: width 0.3s ease, background-color 0.45s ease;
+        }
+
+        .nav-links a:hover::after { width: 100%; }
+
+        .nav-cta {
+            background: var(--black) !important;
+            color: var(--white) !important;
+            padding: 0.55rem 1.4rem;
+            border: 1.5px solid var(--black) !important;
+            transition: background 0.3s, color 0.3s, border-color 0.45s !important;
+        }
+
+        .nav-cta:hover {
+            background: transparent !important;
+            color: var(--black) !important;
+        }
+
+        .nav-cta::after { display: none !important; }
+
+        /* ─── DARK MODE TOGGLE ─── */
+        .theme-toggle {
+            background: none;
+            border: 1.5px solid var(--black);
+            color: var(--black);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            line-height: 1;
+            flex-shrink: 0;
+            transition: background 0.3s, color 0.3s, border-color 0.45s;
+        }
+
+        .theme-toggle:hover {
+            background: var(--black);
+            color: var(--white);
+        }
+
+        /* sun shown in light mode, moon in dark mode */
+        .icon-moon { display: none; }
+        html.dark .icon-sun  { display: none; }
+        html.dark .icon-moon { display: block; }
+
+        /* ─── HERO ─── */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 10rem 2rem 5rem;
+            position: relative;
+            overflow: hidden;
+            background: var(--white);
+            transition: background-color 0.45s ease;
+        }
+
+        .hero-grid {
+            position: absolute; inset: 0;
+            background-image:
+                linear-gradient(var(--grid-line) 1px, transparent 1px),
+                linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+            background-size: 72px 72px;
+        }
+
+        .hero-content { position: relative; z-index: 1; }
+
+        .hero-eyebrow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            font-family: 'Arial', sans-serif;
+            font-size: 0.72rem;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            color: var(--gray-mid);
+            margin-bottom: 2.5rem;
+        }
+
+        .hero-eyebrow::before, .hero-eyebrow::after {
+            content: '';
+            width: 50px; height: 1px;
+            background: var(--gray-mid);
+        }
+
+        .hero-logo {
+            width: 120px; height: 120px;
+            margin: 0 auto 2.5rem;
+        }
+
+        .hero-logo img {
+            width: 100%; height: 100%;
+            display: block;
+        }
+
+        h1 {
+            font-size: clamp(3.5rem, 9vw, 8rem);
+            line-height: 0.95;
+            letter-spacing: -0.03em;
+            font-weight: 900;
+            margin-bottom: 0.4rem;
+        }
+
+        .hero-subtitle {
+            font-size: clamp(1rem, 2.5vw, 1.5rem);
+            font-weight: 300;
+            font-style: italic;
+            color: var(--gray-mid);
+            letter-spacing: 0.04em;
+            margin-bottom: 1.5rem;
+        }
+
+        .hero-slogan {
+            font-family: 'Arial', sans-serif;
+            font-size: 0.8rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--gray-mid);
+            margin-bottom: 3.5rem;
+        }
+
+        .hero-actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+
+        .btn {
+            font-family: 'Arial', sans-serif;
+            font-size: 0.78rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            padding: 1rem 2.5rem;
+            text-decoration: none;
+            display: inline-block;
+            border: 1.5px solid var(--black);
+            transition: background 0.3s, color 0.3s, border-color 0.45s;
+            cursor: pointer;
+        }
+
+        .btn-dark  { background: var(--black); color: var(--white); }
+        .btn-dark:hover  { background: transparent; color: var(--black); }
+        .btn-light { background: transparent; color: var(--black); }
+        .btn-light:hover { background: var(--black); color: var(--white); }
+
+        .scroll-cue {
+            position: absolute;
+            bottom: 2.5rem; left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            font-family: 'Arial', sans-serif;
+            font-size: 0.65rem;
+            letter-spacing: 0.25em;
+            text-transform: uppercase;
+            color: var(--gray-mid);
+            animation: bob 2.2s ease-in-out infinite;
+        }
+
+        .scroll-cue::after {
+            content: '';
+            width: 1px; height: 45px;
+            background: linear-gradient(to bottom, var(--gray-mid), transparent);
+        }
+
+        @keyframes bob {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50%       { transform: translateX(-50%) translateY(10px); }
+        }
+
+        /* ─── ABOUT ─── */
+        .about {
+            background: var(--black);
+            color: var(--white);
+            padding: 7rem 5rem;
+            transition: background-color 0.45s ease, color 0.45s ease;
+        }
+
+        .about-inner {
+            max-width: 1200px; margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 7rem;
+            align-items: center;
+        }
+
+        .label {
+            font-family: 'Arial', sans-serif;
+            font-size: 0.7rem;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            margin-bottom: 1.2rem;
+        }
+
+        .label-light { color: var(--inv-35); }
+        .label-dark  { color: var(--gray-mid); }
+
+        .section-title {
+            font-size: clamp(2rem, 3.5vw, 3rem);
+            line-height: 1.1;
+            letter-spacing: -0.015em;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-body { font-size: 1.35rem; line-height: 1.8; }
+        .section-body-light { color: var(--inv-60); }
+
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2.5rem; }
+
+        .stat {
+            border-left: 1px solid var(--inv-12);
+            padding-left: 1.5rem;
+            transition: border-color 0.45s ease;
+        }
+
+        .stat-num { font-size: 2.8rem; font-weight: 900; line-height: 1; margin-bottom: 0.3rem; }
+
+        .stat-lbl {
+            font-family: 'Arial', sans-serif;
+            font-size: 0.7rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--inv-35);
+        }
+
+        /* ─── SERVICES ─── */
+        .services {
+            padding: 7rem 5rem;
+            background: var(--white);
+            transition: background-color 0.45s ease;
+        }
+
+        .services-inner { max-width: 1200px; margin: 0 auto; }
+
+        .services-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 4rem;
+        }
+
+        .services-note {
+            font-family: 'Arial', sans-serif;
+            font-size: 0.95rem;
+            color: var(--gray-mid);
+            max-width: 260px;
+            line-height: 1.6;
+            text-align: right;
+        }
+
+        .services-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2px;
+            background: var(--black);
+            border: 2px solid var(--black);
+            transition: background-color 0.45s ease, border-color 0.45s ease;
+        }
+
+        .card {
+            background: var(--white);
+            padding: 3rem;
+            position: relative;
+            overflow: hidden;
+            transition: background-color 0.45s ease;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute; inset: 0;
+            background: var(--black);
+            transform: translateY(101%);
+            transition: transform 0.45s cubic-bezier(0.4,0,0.2,1), background-color 0.45s ease;
+            z-index: 0;
+        }
+
+        .card:hover::before { transform: translateY(0); }
+        .card > * { position: relative; z-index: 1; }
+
+        .card-num {
+            font-family: 'Arial', sans-serif;
+            font-size: 0.68rem;
+            letter-spacing: 0.25em;
+            text-transform: uppercase;
+            color: var(--gray-mid);
+            margin-bottom: 2rem;
+            transition: color 0.4s ease;
+        }
+
+        .card-title {
+            font-size: 1.55rem;
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: 1rem;
+            transition: color 0.4s ease;
+        }
+
+        .card-desc {
+            font-size: 1.2rem;
+            line-height: 1.75;
+            color: var(--card-desc);
+            margin-bottom: 2rem;
+            transition: color 0.4s ease;
+        }
+
+        .card-tags { display: flex; flex-wrap: wrap; gap: 0.45rem; }
+
+        .tag {
+            font-family: 'Arial', sans-serif;
+            font-size: 0.65rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            padding: 0.3rem 0.7rem;
+            border: 1px solid var(--norm-18);
+            color: var(--gray-mid);
+            transition: border-color 0.4s ease, color 0.4s ease;
+        }
+
+        .card-arrow {
+            position: absolute;
+            bottom: 2rem; right: 2.5rem;
+            font-size: 1.4rem;
+            opacity: 0;
+            transform: translate(-8px, 8px);
+            transition: opacity 0.4s, transform 0.4s, color 0.4s;
+            z-index: 1;
+        }
+
+        .card:hover .card-num,
+        .card:hover .card-title,
+        .card:hover .card-desc   { color: var(--white); }
+
+        .card:hover .tag {
+            border-color: var(--card-hover-tag-border);
+            color:         var(--card-hover-tag-color);
+        }
+
+        .card:hover .card-arrow {
+            opacity: 1;
+            transform: translate(0,0);
+            color: var(--white);
+        }
+
+        /* ─── PROCESS ─── */
+        .process {
+            background: var(--black);
+            color: var(--white);
+            padding: 7rem 5rem;
+            transition: background-color 0.45s ease, color 0.45s ease;
+        }
+
+        .process-inner { max-width: 1200px; margin: 0 auto; }
+        .process .section-title { color: var(--white); margin-bottom: 5rem; }
+
+        .steps { display: grid; grid-template-columns: repeat(4,1fr); position: relative; }
+
+        .steps::before {
+            content: '';
+            position: absolute;
+            top: 7px; left: 7px; right: 7px;
+            height: 1px;
+            background: var(--inv-12);
+            z-index: 0;
+            transition: background-color 0.45s ease;
+        }
+
+        .step { padding-right: 2.5rem; position: relative; z-index: 1; }
+
+        .step-dot {
+            width: 15px; height: 15px;
+            border: 1.5px solid var(--inv-50);
+            border-radius: 50%;
+            background: var(--black);
+            margin-bottom: 2rem;
+            transition: border-color 0.45s ease, background-color 0.45s ease;
+        }
+
+        .step-num { display: none; }
+
+        .step-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.75rem; color: var(--white); }
+        .step-desc  { font-size: 1.2rem; line-height: 1.7; color: var(--inv-45); }
+
+        /* ─── CTA ─── */
+        .cta {
+            padding: 9rem 5rem;
+            background: var(--white);
+            text-align: center;
+            transition: background-color 0.45s ease;
+        }
+
+        .cta-inner { max-width: 860px; margin: 0 auto; }
+
+        .cta-title {
+            font-size: clamp(2.5rem, 5vw, 4.5rem);
+            font-weight: 900;
+            line-height: 1.05;
+            letter-spacing: -0.02em;
+            margin-bottom: 1.5rem;
+        }
+
+        .cta-divider {
+            width: 36px; height: 2px;
+            background: var(--black);
+            margin: 2rem auto;
+            transition: background-color 0.45s ease;
+        }
+
+        .cta-body { font-size: 1.35rem; line-height: 1.8; color: var(--cta-body); margin-bottom: 3rem; }
+
+        /* ─── FOOTER ─── */
+        footer {
+            background: var(--black);
+            color: var(--white);
+            padding: 5rem 5rem 3rem;
+            transition: background-color 0.45s ease, color 0.45s ease;
+        }
+
+        .footer-top {
+            max-width: 1200px; margin: 0 auto;
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 4rem;
+            padding-bottom: 3.5rem;
+            border-bottom: 1px solid var(--inv-08);
+            margin-bottom: 2.5rem;
+            transition: border-color 0.45s ease;
+        }
+
+        .footer-brand-name { font-size: 1.4rem; font-weight: 900; letter-spacing: 0.1em; margin-bottom: 1rem; }
+        .footer-tagline { font-size: 0.95rem; line-height: 1.7; color: var(--inv-35); max-width: 260px; }
+
+        .footer-address {
+            font-style: normal;
+            font-size: 0.82rem;
+            line-height: 1.7;
+            color: var(--inv-35);
+            margin-top: 1.25rem;
+            transition: color 0.45s ease;
+        }
+
+        .footer-col h4 {
+            font-family: 'Arial', sans-serif;
+            font-size: 0.65rem;
+            letter-spacing: 0.25em;
+            text-transform: uppercase;
+            color: var(--inv-30);
+            margin-bottom: 1.5rem;
+        }
+
+        .footer-col ul { list-style: none; }
+        .footer-col ul li { margin-bottom: 0.7rem; }
+
+        .footer-col ul li a {
+            text-decoration: none;
+            color: var(--inv-55);
+            font-size: 0.88rem;
+            transition: color 0.2s;
+        }
+
+        .footer-col ul li a:hover { color: var(--white); }
+
+        .footer-bottom {
+            max-width: 1200px; margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-family: 'Arial', sans-serif;
+            font-size: 0.7rem;
+            letter-spacing: 0.08em;
+            color: var(--inv-25);
+        }
+
+        /* ─── FADE-UP ANIMATIONS ─── */
+        .fade-up {
+            opacity: 0;
+            transform: translateY(28px);
+            transition: opacity 0.65s ease, transform 0.65s ease;
+        }
+
+        .fade-up.in { opacity: 1; transform: translateY(0); }
+        .fade-up:nth-child(2) { transition-delay: 0.10s; }
+        .fade-up:nth-child(3) { transition-delay: 0.20s; }
+        .fade-up:nth-child(4) { transition-delay: 0.30s; }
+
+        /* ─── CARD ICONS ─── */
+        .card-icon {
+            width: 38px;
+            height: 38px;
+            margin-bottom: 1.75rem;
+            color: var(--gray-mid);
+            transition: color 0.4s ease;
+        }
+        .card:hover .card-icon { color: var(--white); }
+
+        /* ─── LANG TOGGLE ─── */
+        .lang-toggle {
+            background: none;
+            border: 1.5px solid var(--black);
+            color: var(--black);
+            height: 36px;
+            padding: 0 0.75rem;
+            cursor: pointer;
+            font-family: 'Arial', sans-serif;
+            font-size: 0.7rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            flex-shrink: 0;
+            transition: background 0.3s, color 0.3s, border-color 0.45s;
+        }
+        .lang-toggle:hover { background: var(--black); color: var(--white); }
+        .lang-toggle .show-fr { display: none; }
+        html.fr .lang-toggle .show-en { display: none; }
+        html.fr .lang-toggle .show-fr { display: inline; }
+
+        /* ─── TEAM ─── */
+        .about-team {
+            max-width: 1200px;
+            margin: 5rem auto 0;
+            padding-top: 4rem;
+            border-top: 1px solid var(--inv-12);
+            transition: border-color 0.45s ease;
+        }
+
+        .founder-card {
+            display: flex;
+            gap: 3rem;
+            align-items: flex-start;
+            margin-top: 2.5rem;
+        }
+
+        .founder-photo {
+            width: 110px;
+            height: 110px;
+            border-radius: 50%;
+            overflow: hidden;
+            flex-shrink: 0;
+            border: 1.5px solid var(--inv-25);
+            transition: border-color 0.45s ease;
+        }
+
+        .founder-photo img {
+            width: 100%; height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .founder-name {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--white);
+            margin-bottom: 0.3rem;
+            transition: color 0.45s ease;
+        }
+
+        .founder-role {
+            font-family: 'Arial', sans-serif;
+            font-size: 0.68rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--inv-35);
+            margin-bottom: 1.25rem;
+            transition: color 0.45s ease;
+        }
+
+        .founder-bio {
+            font-size: 1.2rem;
+            line-height: 1.75;
+            color: var(--inv-55);
+            margin-bottom: 1.5rem;
+            max-width: 600px;
+            transition: color 0.45s ease;
+        }
+
+        .founder-linkedin {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-family: 'Arial', sans-serif;
+            font-size: 0.68rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--inv-45);
+            text-decoration: none;
+            border-bottom: 1px solid var(--inv-25);
+            padding-bottom: 2px;
+            transition: color 0.2s, border-color 0.2s;
+        }
+
+        .founder-linkedin:hover { color: var(--white); border-color: var(--inv-55); }
+        .founder-linkedin svg { width: 13px; height: 13px; flex-shrink: 0; }
+
+        /* ─── LAPTOP (901px – 1600px) ─── */
+        @media (min-width: 901px) and (max-width: 1600px) {
+            .section-body   { font-size: 1.35rem; }
+            .card-desc      { font-size: 1.2rem; }
+            .step-desc      { font-size: 1.2rem; }
+            .founder-bio    { font-size: 1.2rem; }
+            .cta-body       { font-size: 1.3rem; }
+            .footer-tagline { font-size: 1.1rem; }
+            .services-note  { font-size: 1.1rem; }
+            .stat-lbl       { font-size: 0.82rem; }
+            .footer-col ul li a { font-size: 0.95rem; }
+        }
+
+        /* ─── RESPONSIVE ─── */
+        @media (max-width: 900px) {
+            nav, nav.scrolled { padding: 1.2rem 1.5rem; }
+            .nav-links { display: none; }
+            .about, .services, .process, .cta, footer { padding-left: 1.5rem; padding-right: 1.5rem; }
+            .about-inner { grid-template-columns: 1fr; gap: 3rem; }
+            .services-grid { grid-template-columns: 1fr; }
+            .services-header { flex-direction: column; align-items: flex-start; gap: 1rem; }
+            .services-note { text-align: left; }
+            .steps { grid-template-columns: 1fr; gap: 2.5rem; }
+            .steps::before { display: none; }
+            .footer-top { grid-template-columns: 1fr; gap: 2.5rem; }
+            .footer-bottom { flex-direction: column; gap: 0.75rem; text-align: center; }
+            .founder-card { flex-direction: column; gap: 1.5rem; }
+        }
+    </style>
 </head>
 <body>
 
-  <main class="container">
-
-    <div class="logo-wrap">
-      <img src="navis-logo.png" alt="Navis AI Lab">
-    </div>
-
-    <span class="tag">Initializing systems…</span>
-
-    <h1>NAVIS<br>AI LAB</h1>
-
-    <div class="divider"></div>
-
-    <p class="slogan">
-      <span class="emoji">🧭</span>&nbsp;Our AI compass is set.<br>
-      <strong>Almost there.</strong>&nbsp;<span class="emoji">🌊</span>
-    </p>
-
-    <a href="mailto:remi@navis-ai.fr" class="btn-contact">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-        <rect x="2" y="4" width="20" height="16" rx="2"/>
-        <path d="M2 7l10 7 10-7"/>
-      </svg>
-      Contact us
+<!-- ═══════════════ NAV ═══════════════ -->
+<nav id="navbar">
+    <a href="#" class="nav-logo">
+        <img src="navis-logo.png" class="nav-logo-img" alt="Navis AI">
+        <span class="nav-brand">Navis AI</span>
     </a>
 
-    <div class="status">
-      <span class="status-dot"></span>
-      System online — launch imminent
+    <div class="nav-right">
+        <ul class="nav-links">
+            <li><a href="#services" data-i18n="nav.services">Services</a></li>
+            <li><a href="#about" data-i18n="nav.about">About</a></li>
+            <li><a href="#process" data-i18n="nav.process">Process</a></li>
+            <li><a href="use-cases.html" data-i18n="nav.usecases">Use Cases</a></li>
+            <li><a href="#contact" class="nav-cta" data-i18n="nav.cta">Set Sail &rarr;</a></li>
+        </ul>
+        <!-- Language toggle -->
+        <button class="lang-toggle" id="langToggle" aria-label="Changer de langue">
+            <span class="show-en">FR</span>
+            <span class="show-fr">EN</span>
+        </button>
+        <!-- Dark mode toggle -->
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode" title="Toggle dark mode">
+            <!-- Sun icon (shown in light mode) -->
+            <svg class="icon-sun" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <circle cx="12" cy="12" r="4.5"/>
+                <line x1="12" y1="2"    x2="12" y2="4.5"/>
+                <line x1="12" y1="19.5" x2="12" y2="22"/>
+                <line x1="2"  y1="12"   x2="4.5" y2="12"/>
+                <line x1="19.5" y1="12" x2="22" y2="12"/>
+                <line x1="4.93" y1="4.93" x2="6.7"  y2="6.7"/>
+                <line x1="17.3" y1="17.3" x2="19.07" y2="19.07"/>
+                <line x1="4.93" y1="19.07" x2="6.7"  y2="17.3"/>
+                <line x1="17.3" y1="6.7"   x2="19.07" y2="4.93"/>
+            </svg>
+            <!-- Moon icon (shown in dark mode) -->
+            <svg class="icon-moon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+            </svg>
+        </button>
+    </div>
+</nav>
+
+
+<!-- ═══════════════ HERO ═══════════════ -->
+<section class="hero">
+    <div class="hero-grid"></div>
+    <div class="hero-content">
+        <div class="hero-logo">
+            <img src="navis-logo.png" alt="Navis AI">
+        </div>
+
+        <div class="hero-eyebrow" data-i18n="hero.eyebrow">AI Agents &middot; Custom RAG &middot; Finetuning &middot; AI Workflow &middot; Sovereign Infra</div>
+
+        <h1>NAVIS AI</h1>
+        <p class="hero-subtitle" data-i18n="hero.subtitle">Your AI Ready to Set Sail</p>
+        <p class="hero-slogan" data-i18n="hero.slogan">— Navigate the AI Revolution —</p>
+
+        <div class="hero-actions">
+            <a href="#services" class="btn btn-dark" data-i18n="hero.btn1">Explore Services</a>
+            <a href="#contact" class="btn btn-light" data-i18n="hero.btn2">Start Your Journey</a>
+        </div>
+    </div>
+    <div class="scroll-cue">scroll</div>
+</section>
+
+
+<!-- ═══════════════ ABOUT ═══════════════ -->
+<section class="about" id="about">
+    <div class="about-inner">
+        <div>
+            <p class="label label-light" data-i18n="about.label">Who we are</p>
+            <h2 class="section-title fade-up" style="color:var(--white)" data-i18n="about.title">
+                Cap sur l'IA &mdash;<br>navigons ensemble.
+            </h2>
+            <p class="section-body section-body-light fade-up" data-i18n="about.body">
+                <strong>Navis AI</strong> is an <strong>AI lab</strong> and <strong>independent agency</strong> helping businesses navigate the fast-moving world of artificial intelligence. We bring clarity, rigour, and hands-on expertise to every engagement — from deploying custom AI agents and RAG pipelines to training your own language models. We operate our own on-premise AI stations, giving us full sovereignty over models and hardware — your data never leaves your environment.
+            </p>
+        </div>
+        <div class="stats-grid">
+            <div class="stat fade-up"><div class="stat-num">100%</div><div class="stat-lbl" data-i18n="about.stat1.lbl">Independent</div></div>
+            <div class="stat fade-up"><div class="stat-num">4</div><div class="stat-lbl" data-i18n="about.stat2.lbl">Core Services</div></div>
+            <div class="stat fade-up"><div class="stat-num">GPU</div><div class="stat-lbl" data-i18n="about.stat3.lbl">Own AI Stations</div></div>
+            <div class="stat fade-up"><div class="stat-num">&#8734;</div><div class="stat-lbl" data-i18n="about.stat4.lbl">Possibilities</div></div>
+        </div>
     </div>
 
-  </main>
+    <!-- Team -->
+    <div class="about-team">
+        <p class="label label-light" data-i18n="about.team.label">Notre équipe</p>
+        <div class="founder-card fade-up">
+            <div class="founder-photo">
+                <img src="remi.jpg" alt="Rémi Giraud">
+            </div>
+            <div>
+                <div class="founder-name">Rémi Giraud</div>
+                <div class="founder-role" data-i18n="about.team.founder.role">Fondateur &amp; AI Solutions Architect</div>
+                <p class="founder-bio" data-i18n="about.team.founder.bio">Fort de 6 ans d'expérience dans la tech — du full-stack au cloud, puis au MLOps — Rémi a été Founding Engineer d'une startup Machine Learning spécialisée dans les séries temporelles, avant de se consacrer à la conception de pipelines de données automatisés — de l'ingestion à l'entraînement — et au développement de solutions d'IA générative sur mesure. Contributeur open source actif sur l'écosystème d'inférence locale NVIDIA, il est également spécialiste des infrastructures IA on-premise et de l'écosystème GB10.</p>
+                <a href="https://www.linkedin.com/in/r%C3%A9mi-giraud/" class="founder-linkedin" target="_blank" rel="noopener">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                    </svg>
+                    LinkedIn
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
 
-  <footer>
-    &copy; <span id="year"></span> Navis AI Lab — Coming Soon
-  </footer>
 
-  <script>
-    document.getElementById('year').textContent = new Date().getFullYear();
-  </script>
+<!-- ═══════════════ SERVICES ═══════════════ -->
+<section class="services" id="services">
+    <div class="services-inner">
+        <div class="services-header">
+            <div>
+                <p class="label label-dark" data-i18n="services.label">What we do</p>
+                <h2 class="section-title" data-i18n="services.title">Four ways to set<br>your AI course</h2>
+            </div>
+            <p class="services-note" data-i18n="services.note">Each service is designed to give you a real, lasting competitive edge in the age of AI.</p>
+        </div>
+
+        <div class="services-grid">
+            <div class="card fade-up">
+                <!-- Helm / ship's wheel -->
+                <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+                    <circle cx="12" cy="12" r="9"/>
+                    <circle cx="12" cy="12" r="2.5"/>
+                    <line x1="12"    y1="9.5"  x2="12"    y2="3"/>
+                    <line x1="14.17" y1="10.75" x2="19.79" y2="7.5"/>
+                    <line x1="14.17" y1="13.25" x2="19.79" y2="16.5"/>
+                    <line x1="12"    y1="14.5"  x2="12"    y2="21"/>
+                    <line x1="9.83"  y1="13.25" x2="4.21"  y2="16.5"/>
+                    <line x1="9.83"  y1="10.75" x2="4.21"  y2="7.5"/>
+                </svg>
+                <div class="card-num" data-i18n="c1.num">01 &mdash; AI Agents</div>
+                <h3 class="card-title" data-i18n="c1.title">AI Agents</h3>
+                <p class="card-desc" data-i18n="c1.desc">Your intelligent crew for every mission. We design and deploy autonomous AI agents tailored to your workflows &mdash; built to integrate, act, and deliver measurable results from day one.</p>
+                <div class="card-tags">
+                    <span class="tag" data-i18n="c1.tag1">LLM Integration</span>
+                    <span class="tag" data-i18n="c1.tag2">Automation</span>
+                    <span class="tag" data-i18n="c1.tag3">Custom Build</span>
+                </div>
+                <span class="card-arrow">&rarr;</span>
+            </div>
+
+            <div class="card fade-up">
+                <!-- Compass / boussole -->
+                <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="9"/>
+                    <path d="M12 5 L10.5 12 L13.5 12 Z" fill="currentColor" stroke="none"/>
+                    <path d="M12 19 L10.5 12 L13.5 12 Z" fill="currentColor" opacity="0.25" stroke="none"/>
+                    <line x1="12" y1="3"    x2="12" y2="4.5"/>
+                    <line x1="12" y1="19.5" x2="12" y2="21"/>
+                    <line x1="3"  y1="12"   x2="4.5" y2="12"/>
+                    <line x1="19.5" y1="12" x2="21" y2="12"/>
+                    <circle cx="12" cy="12" r="1" fill="currentColor" stroke="none"/>
+                </svg>
+                <div class="card-num" data-i18n="c2.num">02 &mdash; RAG &amp; Workflow</div>
+                <h3 class="card-title" data-i18n="c2.title">Custom RAG &amp; AI Workflow</h3>
+                <p class="card-desc" data-i18n="c2.desc">Your treasure map through intelligent data, carried by the right currents. We build RAG pipelines on your knowledge base and wire them into AI-driven workflows &mdash; end to end, fully integrated.</p>
+                <div class="card-tags">
+                    <span class="tag" data-i18n="c2.tag1">Knowledge Base</span>
+                    <span class="tag" data-i18n="c2.tag2">Retrieval</span>
+                    <span class="tag" data-i18n="c2.tag3">Orchestration</span>
+                </div>
+                <span class="card-arrow">&rarr;</span>
+            </div>
+
+            <div class="card fade-up">
+                <!-- Anchor -->
+                <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="5.5" r="2"/>
+                    <line x1="12" y1="7.5"  x2="12" y2="20"/>
+                    <line x1="5.5" y1="9.5" x2="18.5" y2="9.5"/>
+                    <path d="M5 17 C5 21.5 19 21.5 19 17"/>
+                    <circle cx="5"  cy="17" r="1.2" fill="currentColor" stroke="none"/>
+                    <circle cx="19" cy="17" r="1.2" fill="currentColor" stroke="none"/>
+                </svg>
+                <div class="card-num" data-i18n="c3.num">03 &mdash; LLM Training</div>
+                <h3 class="card-title" data-i18n="c3.title">LLM Training</h3>
+                <p class="card-desc" data-i18n="c3.desc">Become the captain of your own AI. We fine-tune and train language models on your domain &mdash; your vocabulary, your rules, your data &mdash; so your AI speaks your language, not a generic one.</p>
+                <div class="card-tags">
+                    <span class="tag" data-i18n="c3.tag1">Fine-tuning</span>
+                    <span class="tag" data-i18n="c3.tag2">LoRA</span>
+                    <span class="tag" data-i18n="c3.tag3">Domain Adaptation</span>
+                </div>
+                <span class="card-arrow">&rarr;</span>
+            </div>
+
+            <div class="card fade-up">
+                <!-- Target / bullseye -->
+                <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+                    <circle cx="12" cy="12" r="9"/>
+                    <circle cx="12" cy="12" r="5"/>
+                    <circle cx="12" cy="12" r="1.8" fill="currentColor" stroke="none"/>
+                    <line x1="12" y1="1.5" x2="12" y2="3"/>
+                    <line x1="12" y1="21"  x2="12" y2="22.5"/>
+                    <line x1="1.5" y1="12" x2="3"  y2="12"/>
+                    <line x1="21"  y1="12" x2="22.5" y2="12"/>
+                </svg>
+                <div class="card-num" data-i18n="c4.num">04 &mdash; Benchmark</div>
+                <h3 class="card-title" data-i18n="c4.title">Custom AI Benchmark</h3>
+                <p class="card-desc" data-i18n="c4.desc">Not all AI is created equal. We design rigorous, bespoke evaluations calibrated to your exact use case &mdash; so you choose the right model with data you can trust, not vendor promises.</p>
+                <div class="card-tags">
+                    <span class="tag" data-i18n="c4.tag1">Evaluation</span>
+                    <span class="tag" data-i18n="c4.tag2">Audit</span>
+                    <span class="tag" data-i18n="c4.tag3">Reporting</span>
+                </div>
+                <span class="card-arrow">&rarr;</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ═══════════════ PROCESS ═══════════════ -->
+<section class="process" id="process">
+    <div class="process-inner">
+        <p class="label label-light" data-i18n="process.label">How it works</p>
+        <h2 class="section-title" data-i18n="process.title">Your voyage with Navis</h2>
+
+        <div class="steps">
+            <div class="step fade-up">
+                <div class="step-dot"></div>
+                <div class="step-num" data-i18n="s1.num">01 &mdash; Map</div>
+                <div class="step-title" data-i18n="s1.title">Chart Your Course</div>
+                <p class="step-desc" data-i18n="s1.desc">We start with a thorough analysis of your business needs, existing processes and strategic objectives — to precisely identify where AI can create measurable value for your organisation.</p>
+            </div>
+            <div class="step fade-up">
+                <div class="step-dot"></div>
+                <div class="step-num" data-i18n="s2.num">02 &mdash; Plan</div>
+                <div class="step-title" data-i18n="s2.title">Set the Sails</div>
+                <p class="step-desc" data-i18n="s2.desc">Together we design a clear action plan &mdash; whether building agents, running benchmarks, or upskilling your crew.</p>
+            </div>
+            <div class="step fade-up">
+                <div class="step-dot"></div>
+                <div class="step-num" data-i18n="s3.num">03 &mdash; Build</div>
+                <div class="step-title" data-i18n="s3.title">Navigate Together</div>
+                <p class="step-desc" data-i18n="s3.desc">We execute with precision, staying close to your teams. Every deliverable comes with concrete follow-up: performance metrics, rapid iterations and continuous adjustments to optimise your first deployments from day one.</p>
+            </div>
+            <div class="step fade-up">
+                <div class="step-dot"></div>
+                <div class="step-num" data-i18n="s4.num">04 &mdash; Sail</div>
+                <div class="step-title" data-i18n="s4.title">Reach New Horizons</div>
+                <p class="step-desc" data-i18n="s4.desc">We provide advanced monitoring of our solutions to measure real impact and continuously improve your deployments. We stay on call for every new stage of your journey.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ═══════════════ CTA ═══════════════ -->
+<section class="cta" id="contact">
+    <div class="cta-inner">
+        <p class="label label-dark" data-i18n="cta.label">Ready to navigate?</p>
+        <h2 class="cta-title" data-i18n="cta.title">The wind is up.<br>Set sail.</h2>
+        <div class="cta-divider"></div>
+        <p class="cta-body" data-i18n="cta.body">At the start or mid-project, we&rsquo;re here to guide you &mdash;<br>and help you go further.</p>
+        <a href="mailto:contact@navis-ai.com" class="btn btn-dark">contact@navis-ai.com</a>
+    </div>
+</section>
+
+
+<!-- ═══════════════ FOOTER ═══════════════ -->
+<footer>
+    <div class="footer-top">
+        <div>
+            <div class="footer-brand-name">NAVIS AI</div>
+            <p class="footer-tagline" data-i18n="footer.tagline">Independent AI consultancy. We help businesses chart their course in the age of artificial intelligence.</p>
+            <address class="footer-address">
+                NOVAFFAIRES Business Center<br>
+                27 Bd de l'Ariane<br>
+                06300 Nice, France
+            </address>
+        </div>
+        <div class="footer-col">
+            <h4 data-i18n="footer.col1">Services</h4>
+            <ul>
+                <li><a href="#services">AI Agents</a></li>
+                <li><a href="#services">Custom RAG &amp; AI Workflow</a></li>
+                <li><a href="#services">Finetuning</a></li>
+                <li><a href="#services">Custom AI Benchmark</a></li>
+            </ul>
+        </div>
+        <div class="footer-col">
+            <h4 data-i18n="footer.col2">Company</h4>
+            <ul>
+                <li><a href="#about" data-i18n="footer.about">About</a></li>
+                <li><a href="#process" data-i18n="footer.process">Process</a></li>
+                <li><a href="use-cases.html" data-i18n="footer.usecases">Use Cases</a></li>
+                <li><a href="#contact" data-i18n="footer.contact">Contact</a></li>
+            </ul>
+        </div>
+        <div class="footer-col">
+            <h4 data-i18n="footer.col3">Connect</h4>
+            <ul>
+                <li><a href="mailto:contact@navis-ai.com">contact@navis-ai.com</a></li>
+            </ul>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <span data-i18n="footer.copyright">&copy; 2025 Navis AI &mdash; All rights reserved.</span>
+        <span data-i18n="footer.tagline2">Sail your AI with us</span>
+    </div>
+</footer>
+
+
+<script>
+    // ─── Nav scroll ───
+    const navbar = document.getElementById('navbar');
+    window.addEventListener('scroll', () => {
+        navbar.classList.toggle('scrolled', window.scrollY > 60);
+    });
+
+    // ─── Fade-up on scroll ───
+    const observer = new IntersectionObserver(
+        entries => entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); }),
+        { threshold: 0.12, rootMargin: '0px 0px -40px 0px' }
+    );
+    document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+
+    // ─── Dark mode toggle ───
+    const toggle = document.getElementById('themeToggle');
+    const html   = document.documentElement;
+
+    // Restore saved preference on load
+    if (localStorage.getItem('navis-theme') === 'dark') {
+        html.classList.add('dark');
+    }
+
+    toggle.addEventListener('click', () => {
+        html.classList.toggle('dark');
+        localStorage.setItem('navis-theme', html.classList.contains('dark') ? 'dark' : 'light');
+    });
+
+    // ─── i18n ───
+    const T = {
+        en: {
+            'nav.services': 'Services',
+            'nav.about': 'About',
+            'nav.process': 'Process',
+            'nav.usecases': 'Use Cases',
+            'nav.cta': 'Set Sail &rarr;',
+            'hero.eyebrow': 'AI Agents &middot; Custom RAG &middot; Finetuning &middot; AI Workflow &middot; Sovereign Infra',
+            'hero.subtitle': 'Your AI Ready to Set Sail',
+            'hero.slogan': '&mdash; Navigate the AI Revolution &mdash;',
+            'hero.btn1': 'Explore Services',
+            'hero.btn2': 'Hoist the Sails',
+            'about.label': 'Who we are',
+            'about.title': 'Setting course for AI &mdash;<br>let\'s navigate together.',
+            'about.body': '<strong>Navis AI</strong> is an <strong>AI lab</strong> and <strong>independent agency</strong> helping businesses navigate the fast-moving world of artificial intelligence. We bring clarity, rigour, and hands-on expertise to every engagement &mdash; from deploying custom AI agents and RAG pipelines to training your own language models. We work exclusively with <strong>state-of-the-art models</strong>, selected and fine-tuned to deliver peak performance on your use cases. We operate our own on-premise AI stations, giving us full sovereignty over models and hardware &mdash; your data never leaves your environment.',
+            'about.stat1.lbl': 'Independent',
+            'about.stat2.lbl': 'Core Services',
+            'about.stat3.lbl': 'Own AI Stations',
+            'about.stat4.lbl': 'Possibilities',
+            'about.team.label': 'Our Team',
+            'about.team.founder.role': 'Founder &amp; AI Solutions Architect',
+            'about.team.founder.bio': 'With 6 years across the tech stack — from full-stack development to cloud engineering and MLOps — Rémi was the Founding Engineer of a time series Machine Learning startup before turning his focus to designing automated end-to-end data pipelines — from ingestion to training — and developing custom generative AI solutions. An active open source contributor on the local NVIDIA inference ecosystem, he is also a specialist in on-premise AI infrastructure and the GB10 ecosystem.',
+            'services.label': 'What we do',
+            'services.title': 'Four ways to set<br>your AI course',
+            'services.note': 'Each service is designed to give you a real, lasting competitive edge in the age of AI.',
+            'c1.num': '01 &mdash; AI Agents',
+            'c1.title': 'AI Agents',
+            'c1.desc': 'Your intelligent crew for every mission. We design and deploy autonomous AI agents tailored to your workflows &mdash; built to integrate, act, and deliver measurable results from day one.',
+            'c1.tag1': 'LLM Integration',
+            'c1.tag2': 'Automation',
+            'c1.tag3': 'Custom Build',
+            'c2.num': '02 &mdash; RAG &amp; Workflow',
+            'c2.title': 'Custom RAG &amp; AI Workflow',
+            'c2.desc': 'Your treasure map through intelligent data, carried by the right currents. We build RAG pipelines on your knowledge base and wire them into AI-driven workflows &mdash; end to end, fully integrated.',
+            'c2.tag1': 'Knowledge Base',
+            'c2.tag2': 'Retrieval',
+            'c2.tag3': 'Orchestration',
+            'c3.num': '03 &mdash; Finetuning',
+            'c3.title': 'Finetuning',
+            'c3.desc': 'Become the captain of your own AI. We fine-tune and train state-of-the-art language models on your domain &mdash; your vocabulary, your rules, your data &mdash; so your AI speaks your language, not a generic one.',
+            'c3.tag1': 'Fine-tuning',
+            'c3.tag2': 'LoRA',
+            'c3.tag3': 'Domain Adaptation',
+            'c4.num': '04 &mdash; Benchmark',
+            'c4.title': 'Custom AI Benchmark',
+            'c4.desc': 'Not all AI is created equal. We design rigorous, bespoke evaluations calibrated to your exact use case &mdash; so you choose the right model with data you can trust, not vendor promises.',
+            'c4.tag1': 'Evaluation',
+            'c4.tag2': 'Audit',
+            'c4.tag3': 'Reporting',
+            'process.label': 'How it works',
+            'process.title': 'Your voyage with Navis',
+            's1.num': '01 &mdash; Map',
+            's1.title': 'Chart Your Course',
+            's1.desc': 'We start with a thorough analysis of your business needs, existing processes and strategic objectives — to precisely identify where AI can create measurable value for your organisation.',
+            's2.num': '02 &mdash; Plan',
+            's2.title': 'Set the Sails',
+            's2.desc': 'Together we design a clear action plan &mdash; whether building agents, running benchmarks, or upskilling your teams.',
+            's3.num': '03 &mdash; Build',
+            's3.title': 'Navigate Together',
+            's3.desc': 'We execute with precision, staying close to your teams. Every deliverable comes with concrete follow-up: performance metrics, rapid iterations and continuous adjustments to optimise your first deployments from day one.',
+            's4.num': '04 &mdash; Sail',
+            's4.title': 'Reach New Horizons',
+            's4.desc': 'We provide advanced monitoring of our solutions to measure real impact and continuously improve your deployments. We stay on call for every new stage of your journey.',
+            'cta.label': 'Ready to navigate?',
+            'cta.title': 'The wind is up.<br>Set sail.',
+            'cta.body': 'At the start or mid-project, we&rsquo;re here to guide you &mdash;<br>and help you go further.',
+            'footer.tagline': 'AI lab and independent agency. We help businesses chart their course in the age of artificial intelligence.',
+            'footer.col1': 'Services',
+            'footer.col2': 'Company',
+            'footer.col3': 'Connect',
+            'footer.about': 'About',
+            'footer.process': 'Process',
+            'footer.usecases': 'Use Cases',
+            'footer.contact': 'Contact',
+            'footer.copyright': '&copy; 2025 Navis AI &mdash; All rights reserved.',
+            'footer.tagline2': 'Sail your AI with us'
+        },
+        fr: {
+            'nav.services': 'Services',
+            'nav.about': 'À propos',
+            'nav.process': 'Méthode',
+            'nav.usecases': 'Cas d\'usage',
+            'nav.cta': 'Contact &rarr;',
+            'hero.eyebrow': 'Agents IA &middot; RAG Custom &middot; Affinage de modèles &middot; Workflow IA &middot; Infra Souveraine',
+            'hero.subtitle': 'Prenez le large avec l\'IA',
+            'hero.slogan': '&mdash; Naviguez dans la révolution IA &mdash;',
+            'hero.btn1': 'Découvrir les services',
+            'hero.btn2': 'Hisser les voiles',
+            'about.label': 'Qui sommes-nous',
+            'about.title': 'Cap sur l\'IA &mdash;<br>navigons ensemble.',
+            'about.body': '<strong>Navis AI</strong> est un <strong>laboratoire IA</strong> et une <strong>agence indépendante</strong> qui aide les entreprises à naviguer dans le monde en rapide évolution de l\'intelligence artificielle. Nous apportons clarté, rigueur et expertise opérationnelle à chaque mission &mdash; du déploiement d\'agents IA et de pipelines RAG à l\'entraînement de vos propres modèles. Nous travaillons exclusivement avec des <strong>modèles à l\'état de l\'art</strong>, sélectionnés et affinés pour offrir les meilleures performances sur vos cas d\'usage. Nous opérons nos propres stations IA on-premise, garantissant une souveraineté totale sur les modèles et le matériel &mdash; vos données ne quittent jamais votre environnement.',
+            'about.stat1.lbl': 'Indépendant',
+            'about.stat2.lbl': 'Services clés',
+            'about.stat3.lbl': 'Stations IA propres',
+            'about.stat4.lbl': 'Possibilités',
+            'about.team.label': 'Notre équipe',
+            'about.team.founder.role': 'Fondateur &amp; AI Solutions Architect',
+            'about.team.founder.bio': 'Fort de 6 ans d\'expérience dans la tech — du full-stack au cloud, puis au MLOps — Rémi a été Founding Engineer d\'une startup Machine Learning spécialisée dans les séries temporelles, avant de se consacrer à la conception de pipelines de données automatisés — de l\'ingestion à l\'entraînement — et au développement de solutions d\'IA générative sur mesure. Contributeur open source actif sur l\'écosystème d\'inférence locale NVIDIA, il est également spécialiste des infrastructures IA on-premise et de l\'écosystème GB10.',
+            'services.label': 'Ce que nous faisons',
+            'services.title': 'Quatre manières de tracer<br>votre cap IA',
+            'services.note': 'Chaque service est conçu pour vous donner un avantage concurrentiel durable à l\'ère de l\'IA.',
+            'c1.num': '01 &mdash; Agents IA',
+            'c1.title': 'Agents IA',
+            'c1.desc': 'Votre équipage intelligent pour chaque mission. Nous concevons et déployons des agents IA autonomes taillés à vos workflows &mdash; conçus pour s\'intégrer, agir et produire des résultats mesurables dès le premier jour.',
+            'c1.tag1': 'Intégration LLM',
+            'c1.tag2': 'Automatisation',
+            'c1.tag3': 'Sur mesure',
+            'c2.num': '02 &mdash; RAG &amp; Workflow',
+            'c2.title': 'RAG Custom &amp; Workflow IA',
+            'c2.desc': 'Votre carte au trésor à travers les données intelligentes, portée par les bons courants. Nous construisons des pipelines RAG sur votre base de connaissances et les intégrons dans des workflows IA &mdash; bout en bout, entièrement intégrés.',
+            'c2.tag1': 'Base de connaissances',
+            'c2.tag2': 'Retrieval',
+            'c2.tag3': 'Orchestration',
+            'c3.num': '03 &mdash; Affinage',
+            'c3.title': 'Affinage de modèles',
+            'c3.desc': 'Devenez le capitaine de votre propre IA. Nous affinons et entraînons des modèles de langage à l\'état de l\'art sur votre domaine &mdash; votre vocabulaire, vos règles, vos données &mdash; pour que votre IA parle votre langue, pas une langue générique.',
+            'c3.tag1': 'Affinage',
+            'c3.tag2': 'LoRA',
+            'c3.tag3': 'Adaptation de domaine',
+            'c4.num': '04 &mdash; Benchmark',
+            'c4.title': 'Benchmark IA sur mesure',
+            'c4.desc': 'Toutes les IA ne se valent pas. Nous concevons des évaluations rigoureuses et sur mesure calibrées à votre cas d\'usage &mdash; pour choisir le bon modèle avec des données fiables, pas des promesses fournisseur.',
+            'c4.tag1': 'Évaluation',
+            'c4.tag2': 'Audit',
+            'c4.tag3': 'Reporting',
+            'process.label': 'Comment ça marche',
+            'process.title': 'Votre voyage avec Navis',
+            's1.num': '01 &mdash; Carte',
+            's1.title': 'Tracer votre cap',
+            's1.desc': 'Nous débutons par une analyse approfondie de vos besoins métier, de vos processus existants et de vos objectifs stratégiques — pour identifier précisément où l\'IA peut créer de la valeur pour votre organisation.',
+            's2.num': '02 &mdash; Plan',
+            's2.title': 'Mettre les voiles',
+            's2.desc': 'Ensemble, nous concevons un plan d\'action clair &mdash; qu\'il s\'agisse de construire des agents, de lancer des benchmarks ou de former vos équipes.',
+            's3.num': '03 &mdash; Construction',
+            's3.title': 'Naviguer ensemble',
+            's3.desc': 'Nous exécutons avec précision en restant proches de vos équipes. Chaque livrable s\'accompagne d\'un suivi concret : métriques de performance, itérations rapides et ajustements continus pour optimiser dès les premiers déploiements.',
+            's4.num': '04 &mdash; Large',
+            's4.title': 'Atteindre de nouveaux horizons',
+            's4.desc': 'Nous assurons un monitoring avancé de nos solutions pour mesurer l\'impact réel et améliorer en continu vos déploiements. Nous restons disponibles pour chaque nouvelle étape de votre voyage.',
+            'cta.label': 'Prêt à naviguer\u00a0?',
+            'cta.title': 'Le vent se lève.<br>Levez les voiles.',
+            'cta.body': 'En début ou en cours de projet, nous sommes là pour vous accompagner &mdash;<br>et vous aider à aller plus loin.',
+            'footer.tagline': 'Laboratoire IA et agence indépendante. Nous aidons les entreprises à tracer leur cap à l\'ère de l\'intelligence artificielle.',
+            'footer.col1': 'Services',
+            'footer.col2': 'Entreprise',
+            'footer.col3': 'Contact &amp; Liens',
+            'footer.about': 'À propos',
+            'footer.process': 'Méthode',
+            'footer.usecases': 'Cas d\'usage',
+            'footer.contact': 'Contact',
+            'footer.copyright': '&copy; 2025 Navis AI &mdash; Tous droits réservés.',
+            'footer.tagline2': 'Naviguez avec nous'
+        }
+    };
+
+    function setLang(code) {
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+            const v = T[code]?.[el.dataset.i18n];
+            if (v !== undefined) el.innerHTML = v;
+        });
+        document.documentElement.lang = code;
+        document.documentElement.classList.toggle('fr', code === 'fr');
+        localStorage.setItem('navis-lang', code);
+    }
+
+    const savedLang = localStorage.getItem('navis-lang');
+    setLang(savedLang || 'fr');
+
+    document.getElementById('langToggle').addEventListener('click', () => {
+        setLang(document.documentElement.classList.contains('fr') ? 'en' : 'fr');
+    });
+</script>
 
 </body>
 </html>
