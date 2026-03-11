@@ -116,7 +116,7 @@
         /* Light mode: use dedicated light logo */
         html:not(.dark) .nav-logo-img,
         html:not(.dark) .hero-logo img {
-            content: url('navis-logo-light.png');
+            content: url('logos/navis-logo-light.png');
         }
 
         .nav-brand {
@@ -347,7 +347,8 @@
         }
 
         .label {
-            font-size: 0.7rem;
+            font-size: 0.95rem;
+            font-weight: 700;
             letter-spacing: 0.3em;
             text-transform: uppercase;
             margin-bottom: 1.2rem;
@@ -741,6 +742,58 @@
         .founder-linkedin:hover { color: var(--white); border-color: var(--inv-55); }
         .founder-linkedin svg { width: 13px; height: 13px; flex-shrink: 0; }
 
+        /* ─── CERTIFICATIONS & PARTNERSHIPS ─── */
+        .about-certs {
+            max-width: 1200px;
+            margin: 4rem auto 0;
+            padding-top: 3.5rem;
+            border-top: 1px solid var(--inv-12);
+            transition: border-color 0.45s ease;
+        }
+
+        .certs-grid {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            gap: 2rem 4rem;
+            margin-top: 2.5rem;
+        }
+
+        .cert-item {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .cert-logo {
+            height: 30px;
+            width: auto;
+            filter: grayscale(1) invert(1);
+            opacity: 0.55;
+            transition: opacity 0.25s ease, filter 0.45s ease;
+        }
+
+        /* Dark mode : fond about clair → logos sombres */
+        html.dark .cert-logo { filter: grayscale(1); }
+
+        /* Tailles sur mesure par logo */
+        .cert-logo[alt="NVIDIA"]    { height: 156px; }
+        .cert-logo[alt="LangChain"] { height: 57px; }
+        .cert-logo[alt="Anthropic"] { height: 39px; }
+
+
+        /* ─── LOGOS MOBILE ─── */
+        @media (max-width: 900px) {
+            .certs-grid {
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 2rem 2.5rem;
+            }
+        }
+
+        .cert-logo:hover { opacity: 1; }
+
         /* ─── BACK TO TOP ─── */
         .back-to-top {
             position: fixed;
@@ -809,7 +862,7 @@
 <!-- ═══════════════ NAV ═══════════════ -->
 <nav id="navbar">
     <a href="#" class="nav-logo">
-        <img src="navis-logo.png" class="nav-logo-img" alt="Navis AI">
+        <img src="logos/navis-logo.png" class="nav-logo-img" alt="Navis AI">
         <span class="nav-brand">Navis AI</span>
     </a>
 
@@ -854,7 +907,7 @@
     <div class="hero-grid"></div>
     <div class="hero-content">
         <div class="hero-logo">
-            <img src="navis-logo.png" alt="Navis AI">
+            <img src="logos/navis-logo.png" alt="Navis AI">
         </div>
 
         <div class="hero-eyebrow" data-i18n="hero.eyebrow">AI Agents &middot; Custom RAG &middot; Finetuning &middot; AI Workflow &middot; Sovereign Infra</div>
@@ -909,6 +962,22 @@
                     </svg>
                     LinkedIn
                 </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Certifications & Partnerships -->
+    <div class="about-certs">
+        <p class="label label-light" data-i18n="about.certs.label">Certifiés par les Leaders de l'IA</p>
+        <div class="certs-grid">
+            <div class="cert-item fade-up">
+                <img src="logos/nvidia.webp" alt="NVIDIA" class="cert-logo">
+            </div>
+            <div class="cert-item fade-up">
+                <img src="logos/langchain.png" alt="LangChain" class="cert-logo">
+            </div>
+            <div class="cert-item fade-up">
+                <img src="logos/Anthropic_logo.svg" alt="Anthropic" class="cert-logo">
             </div>
         </div>
     </div>
@@ -1176,6 +1245,7 @@
             'about.stat3.lbl': 'Own AI Stations',
             'about.stat4.lbl': 'Possibilities',
             'about.team.label': 'Our Team',
+            'about.certs.label': 'Certified by AI Leaders',
             'about.team.founder.role': 'Founder &amp; AI Solutions Architect',
             'about.team.founder.bio': 'With 6 years across the tech stack — from full-stack development to AWS cloud engineering and MLOps — Rémi was the Founding Engineer of a startup specialising in time series using Machine Learning before turning his focus to designing automated end-to-end data pipelines — from ingestion to training — and developing custom generative AI solutions. Certified across multiple AI frameworks (NVIDIA ecosystem, LangChain, Anthropic Academy), he is an active open source contributor and a specialist in on-premise AI infrastructure and the GB10 ecosystem.',
             'services.label': 'What we do',
@@ -1252,6 +1322,7 @@
             'about.stat3.lbl': 'Stations IA propres',
             'about.stat4.lbl': 'Possibilités',
             'about.team.label': 'Notre équipe',
+            'about.certs.label': 'Certifiés par les Leaders de l\'IA',
             'about.team.founder.role': 'Fondateur &amp; AI Solutions Architect',
             'about.team.founder.bio': 'Fort de 6 ans d\'expérience dans la tech — du full-stack au cloud AWS, puis au MLOps — Rémi a été Founding Engineer d\'une startup spécialisée dans les séries temporelles utilisant du Machine Learning, avant de se consacrer à la conception de pipelines de données automatisés — de l\'ingestion à l\'entraînement — et au développement de solutions d\'IA générative sur mesure. Certifié sur de multiples frameworks IA (écosystème NVIDIA, LangChain, Anthropic Academy), il est contributeur open source actif et spécialiste des infrastructures IA on-premise et de l\'écosystème GB10.',
             'services.label': 'Ce que nous faisons',
