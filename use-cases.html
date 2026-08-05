@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,22 +7,57 @@
     <style>
         *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
 
+        /* ─── THEME TOKENS ─── */
         :root {
             --black: #0a0a0a;
             --white: #f5f5f0;
             --gray-mid: #888880;
+
             --nav-bg: rgba(245,245,240,0.97);
             --nav-border: rgba(10,10,10,0.08);
             --grid-line: rgba(10,10,10,0.04);
+
+            --inv-08: rgba(245,245,240,0.08);
+            --inv-12: rgba(245,245,240,0.12);
+            --inv-25: rgba(245,245,240,0.25);
+            --inv-30: rgba(245,245,240,0.30);
+            --inv-35: rgba(245,245,240,0.35);
+            --inv-45: rgba(245,245,240,0.45);
+            --inv-55: rgba(245,245,240,0.55);
+            --inv-60: rgba(245,245,240,0.60);
+
+            --norm-18: rgba(10,10,10,0.18);
+
+            --card-desc: #555550;
+            --card-hover-tag-border: rgba(245,245,240,0.25);
+            --card-hover-tag-color:  rgba(245,245,240,0.50);
+            --cta-body: #555550;
         }
 
         html.dark {
             --black: #f5f5f0;
             --white: #0a0a0a;
             --gray-mid: #777770;
+
             --nav-bg: rgba(10,10,10,0.98);
             --nav-border: rgba(245,245,240,0.08);
             --grid-line: rgba(245,245,240,0.04);
+
+            --inv-08: rgba(10,10,10,0.08);
+            --inv-12: rgba(10,10,10,0.12);
+            --inv-25: rgba(10,10,10,0.25);
+            --inv-30: rgba(10,10,10,0.30);
+            --inv-35: rgba(10,10,10,0.35);
+            --inv-45: rgba(10,10,10,0.45);
+            --inv-55: rgba(10,10,10,0.55);
+            --inv-60: rgba(10,10,10,0.60);
+
+            --norm-18: rgba(245,245,240,0.18);
+
+            --card-desc: #aaaaa8;
+            --card-hover-tag-border: rgba(10,10,10,0.25);
+            --card-hover-tag-color:  rgba(10,10,10,0.50);
+            --cta-body: #aaaaa8;
         }
 
         html { scroll-behavior: smooth; }
@@ -50,6 +85,8 @@
             transition: padding 0.3s ease, background-color 0.45s ease, border-color 0.45s ease;
         }
 
+        nav.scrolled { padding: 1rem 5rem; }
+
         .nav-logo {
             display: flex;
             align-items: center;
@@ -60,8 +97,7 @@
         }
 
         .nav-logo-img { width: 44px; height: 44px; display: block; }
-
-        html:not(.dark) .nav-logo-img { content: url('navis-logo-light.png'); }
+        html:not(.dark) .nav-logo-img { content: url('logos/navis-logo-light.png'); }
 
         .nav-brand {
             font-size: 1.1rem;
@@ -71,7 +107,6 @@
         }
 
         .nav-right { display: flex; align-items: center; gap: 2rem; }
-
         .nav-links { display: flex; align-items: center; gap: 2.5rem; list-style: none; }
 
         .nav-links a {
@@ -96,13 +131,15 @@
         }
 
         .nav-links a:hover::after { width: 100%; }
-
         .nav-links a.active::after { width: 100%; }
 
         .nav-cta {
             background: var(--black) !important;
             color: var(--white) !important;
-            padding: 0.55rem 1.4rem;
+            height: 36px;
+            padding: 0 1.4rem;
+            display: inline-flex !important;
+            align-items: center;
             border: 1.5px solid var(--black) !important;
             transition: background 0.3s, color 0.3s, border-color 0.45s !important;
         }
@@ -151,22 +188,22 @@
         html.fr .lang-toggle .show-en { display: none; }
         html.fr .lang-toggle .show-fr { display: inline; }
 
-        /* ─── COMING SOON ─── */
-        .coming-soon {
-            min-height: 100vh;
+        /* ─── PAGE HERO ─── */
+        .page-hero {
+            min-height: auto;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             text-align: center;
-            padding: 10rem 2rem 5rem;
+            padding: 8.5rem 2rem 3.5rem;
             position: relative;
             overflow: hidden;
             background: var(--white);
             transition: background-color 0.45s ease;
         }
 
-        .cs-grid {
+        .ph-grid {
             position: absolute; inset: 0;
             background-image:
                 linear-gradient(var(--grid-line) 1px, transparent 1px),
@@ -174,9 +211,9 @@
             background-size: 72px 72px;
         }
 
-        .cs-content { position: relative; z-index: 1; max-width: 720px; }
+        .ph-content { position: relative; z-index: 1; max-width: 760px; }
 
-        .cs-eyebrow {
+        .ph-eyebrow {
             display: flex;
             align-items: center;
             justify-content: center;
@@ -186,47 +223,211 @@
             letter-spacing: 0.3em;
             text-transform: uppercase;
             color: var(--gray-mid);
-            margin-bottom: 2.5rem;
+            margin-bottom: 1.5rem;
         }
 
-        .cs-eyebrow::before, .cs-eyebrow::after {
+        .ph-eyebrow::before, .ph-eyebrow::after {
             content: '';
             width: 50px; height: 1px;
             background: var(--gray-mid);
         }
 
-        .cs-label {
+        .ph-title {
+            font-size: clamp(2rem, 4.5vw, 3.5rem);
+            line-height: 1.05;
+            letter-spacing: -0.02em;
+            font-weight: 900;
+            margin-bottom: 1rem;
+        }
+
+        .ph-sub {
+            font-size: 1.15rem;
+            line-height: 1.8;
+            color: var(--gray-mid);
+            max-width: 560px;
+            margin: 0 auto;
+        }
+
+        /* ─── USE CASES ─── */
+        .usecases {
+            padding: 0 5rem 7rem;
+            background: var(--white);
+            transition: background-color 0.45s ease;
+        }
+
+        .usecases-inner { max-width: 1200px; margin: 0 auto; }
+
+        .uc-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 4rem;
+            padding-top: 2rem;
+        }
+
+        .label {
             font-family: 'Arial', sans-serif;
-            font-size: 0.7rem;
+            font-size: 0.95rem;
+            font-weight: 700;
             letter-spacing: 0.3em;
             text-transform: uppercase;
-            color: var(--gray-mid);
+            margin-bottom: 1.2rem;
+        }
+
+        .label-dark { color: var(--gray-mid); }
+
+        .section-title {
+            font-size: clamp(2rem, 3.5vw, 3rem);
+            line-height: 1.1;
+            letter-spacing: -0.015em;
             margin-bottom: 1.5rem;
         }
 
-        .cs-title {
-            font-size: clamp(3rem, 8vw, 6.5rem);
-            line-height: 0.95;
-            letter-spacing: -0.03em;
-            font-weight: 900;
-            margin-bottom: 2rem;
-        }
-
-        .cs-body {
-            font-size: 1.2rem;
-            line-height: 1.8;
+        .uc-note {
+            font-family: 'Arial', sans-serif;
+            font-size: 0.95rem;
             color: var(--gray-mid);
-            margin-bottom: 3rem;
-            max-width: 560px;
-            margin-left: auto;
-            margin-right: auto;
+            max-width: 280px;
+            line-height: 1.6;
+            text-align: right;
         }
 
-        .cs-divider {
+        .uc-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2px;
+            background: var(--black);
+            border: 2px solid var(--black);
+            transition: background-color 0.45s ease, border-color 0.45s ease;
+        }
+
+        .card {
+            display: block;
+            background: var(--white);
+            padding: 3rem;
+            position: relative;
+            overflow: hidden;
+            text-decoration: none;
+            color: inherit;
+            transition: background-color 0.45s ease;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute; inset: 0;
+            background: var(--black);
+            transform: translateY(101%);
+            transition: transform 0.45s cubic-bezier(0.4,0,0.2,1), background-color 0.45s ease;
+            z-index: 0;
+        }
+
+        .card:hover::before { transform: translateY(0); }
+        .card > * { position: relative; z-index: 1; }
+
+        .card-num {
+            font-family: 'Arial', sans-serif;
+            font-size: 0.68rem;
+            letter-spacing: 0.25em;
+            text-transform: uppercase;
+            color: var(--gray-mid);
+            margin-bottom: 1rem;
+            transition: color 0.4s ease;
+        }
+
+        .card-title {
+            font-size: 1.55rem;
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: 1rem;
+            transition: color 0.4s ease;
+        }
+
+        .card-desc {
+            font-size: 1.2rem;
+            line-height: 1.75;
+            color: var(--card-desc);
+            margin-bottom: 1.5rem;
+            transition: color 0.4s ease;
+        }
+
+        .card-tags { display: flex; flex-wrap: wrap; gap: 0.45rem; }
+
+        .tag {
+            font-family: 'Arial', sans-serif;
+            font-size: 0.65rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            padding: 0.3rem 0.7rem;
+            border: 1px solid var(--norm-18);
+            color: var(--gray-mid);
+            transition: border-color 0.4s ease, color 0.4s ease;
+        }
+
+        .card-arrow {
+            position: absolute;
+            bottom: 2rem; right: 2.5rem;
+            font-size: 1.4rem;
+            opacity: 0;
+            transform: translate(-8px, 8px);
+            transition: opacity 0.4s, transform 0.4s, color 0.4s;
+            z-index: 1;
+            text-decoration: none;
+            color: var(--black);
+        }
+
+        .card:hover .card-num,
+        .card:hover .card-title,
+        .card:hover .card-desc { color: var(--white); }
+
+        .card:hover .tag {
+            border-color: var(--card-hover-tag-border);
+            color:         var(--card-hover-tag-color);
+        }
+
+        .card:hover .card-arrow {
+            opacity: 1;
+            transform: translate(0,0);
+            color: var(--white);
+        }
+
+        .card-icon-img {
+            width: 38px;
+            height: 38px;
+            object-fit: contain;
+            margin-bottom: 1.75rem;
+        }
+
+        /* ─── CTA ─── */
+        .cta {
+            padding: 9rem 5rem;
+            background: var(--white);
+            text-align: center;
+            border-top: 2px solid var(--black);
+            transition: background-color 0.45s ease, border-color 0.45s ease;
+        }
+
+        .cta-inner { max-width: 860px; margin: 0 auto; }
+
+        .cta-title {
+            font-size: clamp(2.5rem, 5vw, 4.5rem);
+            font-weight: 900;
+            line-height: 1.05;
+            letter-spacing: -0.02em;
+            margin-bottom: 1.5rem;
+        }
+
+        .cta-divider {
             width: 36px; height: 2px;
             background: var(--black);
-            margin: 0 auto 3rem;
+            margin: 2rem auto;
             transition: background-color 0.45s ease;
+        }
+
+        .cta-body {
+            font-size: 1.35rem;
+            line-height: 1.8;
+            color: var(--cta-body);
+            margin-bottom: 3rem;
         }
 
         .btn {
@@ -242,21 +443,129 @@
             cursor: pointer;
         }
 
-        .btn-light { background: transparent; color: var(--black); }
-        .btn-light:hover { background: var(--black); color: var(--white); }
+        .btn-dark  { background: var(--black); color: var(--white); }
+        .btn-dark:hover  { background: transparent; color: var(--black); }
+
+        /* ─── FOOTER ─── */
+        footer {
+            background: var(--black);
+            color: var(--white);
+            padding: 5rem 5rem 3rem;
+            transition: background-color 0.45s ease, color 0.45s ease;
+        }
+
+        .footer-top {
+            max-width: 1200px; margin: 0 auto;
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 4rem;
+            padding-bottom: 3.5rem;
+            border-bottom: 1px solid var(--inv-08);
+            margin-bottom: 2.5rem;
+            transition: border-color 0.45s ease;
+        }
+
+        .footer-brand-name { font-size: 1.4rem; font-weight: 900; letter-spacing: 0.1em; margin-bottom: 1rem; }
+        .footer-tagline { font-size: 0.95rem; line-height: 1.7; color: var(--inv-35); max-width: 260px; }
+
+        .footer-address {
+            font-style: normal;
+            font-size: 0.82rem;
+            line-height: 1.7;
+            color: var(--inv-35);
+            margin-top: 1.25rem;
+            transition: color 0.45s ease;
+        }
+
+        .footer-col h4 {
+            font-size: 0.65rem;
+            letter-spacing: 0.25em;
+            text-transform: uppercase;
+            color: var(--inv-30);
+            margin-bottom: 1.5rem;
+        }
+
+        .footer-col ul { list-style: none; }
+        .footer-col ul li { margin-bottom: 0.7rem; }
+
+        .footer-col ul li a {
+            text-decoration: none;
+            color: var(--inv-55);
+            font-size: 0.88rem;
+            transition: color 0.2s;
+        }
+
+        .footer-col ul li a:hover { color: var(--white); }
+
+        .footer-bottom {
+            max-width: 1200px; margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.7rem;
+            letter-spacing: 0.08em;
+            color: var(--inv-25);
+        }
+
+        /* ─── BACK TO TOP ─── */
+        .back-to-top {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--black);
+            color: var(--white);
+            border: 1.5px solid var(--black);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 99;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(10px);
+            transition: opacity 0.3s ease, transform 0.3s ease, background 0.3s, color 0.3s, border-color 0.45s;
+        }
+
+        .back-to-top.visible {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateY(0);
+        }
+
+        .back-to-top:hover { background: transparent; color: var(--black); }
+
+        /* ─── FADE-UP ─── */
+        .fade-up {
+            opacity: 0;
+            transform: translateY(28px);
+            transition: opacity 0.65s ease, transform 0.65s ease;
+        }
+
+        .fade-up.in { opacity: 1; transform: translateY(0); }
+        .fade-up:nth-child(2) { transition-delay: 0.10s; }
+        .fade-up:nth-child(3) { transition-delay: 0.20s; }
+        .fade-up:nth-child(4) { transition-delay: 0.30s; }
 
         /* ─── RESPONSIVE ─── */
         @media (max-width: 900px) {
-            nav { padding: 1.2rem 1.5rem; }
+            nav, nav.scrolled { padding: 1.2rem 1.5rem; }
             .nav-links { display: none; }
+            .usecases, .cta, footer { padding-left: 1.5rem; padding-right: 1.5rem; }
+            .uc-header { flex-direction: column; align-items: flex-start; gap: 1rem; }
+            .uc-note { text-align: left; }
+            .footer-top { grid-template-columns: 1fr; gap: 2.5rem; }
+            .footer-bottom { flex-direction: column; gap: 0.75rem; text-align: center; }
         }
     </style>
 </head>
 <body>
 
-<nav>
+<nav id="navbar">
     <a href="index.html" class="nav-logo">
-        <img src="navis-logo.png" class="nav-logo-img" alt="Navis AI">
+        <img src="logos/navis-logo.png" class="nav-logo-img" alt="Navis AI">
         <span class="nav-brand">Navis AI</span>
     </a>
     <div class="nav-right">
@@ -290,24 +599,133 @@
     </div>
 </nav>
 
-<section class="coming-soon">
-    <div class="cs-grid"></div>
-    <div class="cs-content">
-        <div class="cs-eyebrow" data-i18n="cs.eyebrow">Navis AI &middot; Use Cases</div>
-        <p class="cs-label" data-i18n="cs.label">Cas d'usage</p>
-        <h1 class="cs-title" data-i18n="cs.title">À venir.</h1>
-        <div class="cs-divider"></div>
-        <p class="cs-body" data-i18n="cs.body">Nous mettons actuellement à jour cette page avec nos études de cas, nos retours terrain et nos contributions open source. Revenez bientôt.</p>
-        <a href="index.html" class="btn btn-light" data-i18n="cs.back">&larr; Retour à l'accueil</a>
+<!-- ═══════════════ HERO ═══════════════ -->
+<section class="page-hero">
+    <div class="ph-grid"></div>
+    <div class="ph-content">
+        <div class="ph-eyebrow" data-i18n="ph.eyebrow">Navis AI &middot; Cas d'usage</div>
+        <h1 class="ph-title" data-i18n="ph.title">Cas d'usage</h1>
+        <p class="ph-sub" data-i18n="ph.sub">Des projets concrets, racontés comme ils avancent &mdash; des agents déployés aux benchmarks sur mesure, on vous montre le travail en cours.</p>
     </div>
 </section>
 
+<!-- ═══════════════ USE CASES ═══════════════ -->
+<section class="usecases">
+    <div class="usecases-inner">
+        <div class="uc-header fade-up">
+            <div>
+                <p class="label label-dark" data-i18n="uc.label">Sur le pont</p>
+                <h2 class="section-title" data-i18n="uc.title">Nos cas d'usage</h2>
+            </div>
+            <p class="uc-note" data-i18n="uc.note">Une carte par cas d'usage &mdash; diagnostic, correctif et résultats documentés de bout en bout.</p>
+        </div>
+
+        <div class="uc-grid">
+            <a href="articles/inference-engineering-laguna-looping.html" class="card fade-up">
+                <img src="logos/poolside-logomark.svg" alt="poolside" class="card-icon-img">
+                <div class="card-num" data-i18n="uc1.num">01 &mdash; Inference Engineering</div>
+                <h3 class="card-title" data-i18n="uc1.title">Dompter le looping de poolside Laguna S 2.1</h3>
+                <p class="card-desc" data-i18n="uc1.desc">Déploiement de poolside Laguna S 2.1 (118B MoE) sur DGX Spark : 40 % des runs bouclaient sans fin. Diagnostic d'un « reasoning attractor », corrigé par deux paramètres vLLM (repetition_penalty + détection native d'ngrammes) &mdash; 0 timeout, 80 % de passes, une heure de calcul économisée par déploiement.</p>
+                <div class="card-tags">
+                    <span class="tag" data-i18n="uc1.tag1">Inference</span>
+                    <span class="tag" data-i18n="uc1.tag2">vLLM</span>
+                    <span class="tag" data-i18n="uc1.tag3">DGX Spark</span>
+                </div>
+                <span class="card-arrow">&rarr;</span>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════ CTA ═══════════════ -->
+<section class="cta">
+    <div class="cta-inner">
+        <p class="label label-dark" data-i18n="cta.label">Un projet à mettre au large ?</p>
+        <h2 class="cta-title" data-i18n="cta.title">Parlons du vôtre.</h2>
+        <div class="cta-divider"></div>
+        <p class="cta-body" data-i18n="cta.body">À l'écoute pour construire votre prochain cas d'usage &mdash;<br>de l'idée au déploiement.</p>
+        <a href="mailto:contact@navis-ai.com" class="btn btn-dark">contact@navis-ai.com</a>
+    </div>
+</section>
+
+<!-- ═══════════════ FOOTER ═══════════════ -->
+<footer>
+    <div class="footer-top">
+        <div>
+            <div class="footer-brand-name">NAVIS AI</div>
+            <p class="footer-tagline" data-i18n="footer.tagline">Laboratoire IA et agence indépendante. Nous aidons les entreprises à tracer leur cap à l'ère de l'intelligence artificielle.</p>
+            <address class="footer-address">
+                NOVAFFAIRES Business Center<br>
+                27 Bd de l'Ariane<br>
+                06300 Nice, France
+            </address>
+        </div>
+        <div class="footer-col">
+            <h4 data-i18n="footer.col1">Services</h4>
+            <ul>
+                <li><a href="index.html#services">AI Agents</a></li>
+                <li><a href="index.html#services">Custom RAG &amp; AI Workflow</a></li>
+                <li><a href="index.html#services">Finetuning</a></li>
+                <li><a href="index.html#services">Custom AI Benchmark</a></li>
+            </ul>
+        </div>
+        <div class="footer-col">
+            <h4 data-i18n="footer.col2">Entreprise</h4>
+            <ul>
+                <li><a href="index.html#about" data-i18n="footer.about">À propos</a></li>
+                <li><a href="index.html#process" data-i18n="footer.process">Méthode</a></li>
+                <li><a href="use-cases.html" data-i18n="footer.usecases">Cas d'usage</a></li>
+                <li><a href="index.html#contact" data-i18n="footer.contact">Contact</a></li>
+            </ul>
+        </div>
+        <div class="footer-col">
+            <h4 data-i18n="footer.col3">Contact &amp; Liens</h4>
+            <ul>
+                <li><a href="mailto:contact@navis-ai.com">contact@navis-ai.com</a></li>
+            </ul>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <span data-i18n="footer.copyright">&copy; 2025 Navis AI &mdash; Tous droits réservés.</span>
+        <span data-i18n="footer.tagline2">Naviguez avec nous</span>
+    </div>
+</footer>
+
+<button class="back-to-top" id="backToTop" aria-label="Retour en haut">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="12" y1="19" x2="12" y2="5"/>
+        <polyline points="5 12 12 5 19 12"/>
+    </svg>
+</button>
+
 <script>
+    // ─── Nav scroll ───
+    const navbar = document.getElementById('navbar');
+    window.addEventListener('scroll', () => {
+        navbar.classList.toggle('scrolled', window.scrollY > 60);
+    });
+
+    // ─── Back to top ───
+    const backToTop = document.getElementById('backToTop');
+    window.addEventListener('scroll', () => {
+        backToTop.classList.toggle('visible', window.scrollY > 400);
+    });
+    backToTop.addEventListener('click', () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    // ─── Fade-up on scroll ───
+    const observer = new IntersectionObserver(
+        entries => entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); }),
+        { threshold: 0.12, rootMargin: '0px 0px -40px 0px' }
+    );
+    document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+
     // ─── Dark mode ───
     const toggle = document.getElementById('themeToggle');
     const html   = document.documentElement;
 
-    if (localStorage.getItem('navis-theme') === 'dark') html.classList.add('dark');
+    if (localStorage.getItem('navis-theme') !== 'light') html.classList.add('dark');
 
     toggle.addEventListener('click', () => {
         html.classList.toggle('dark');
@@ -322,23 +740,63 @@
             'nav.process':   'Process',
             'nav.usecases':  'Use Cases',
             'nav.cta':       'Set Sail &rarr;',
-            'cs.eyebrow':    'Navis AI &middot; Use Cases',
-            'cs.label':      'Use Cases',
-            'cs.title':      'Coming soon.',
-            'cs.body':       'We are currently updating this page with case studies, field insights and open source contributions. Check back soon.',
-            'cs.back':       '&larr; Back to home'
+            'ph.eyebrow':    'Navis AI &middot; Use Cases',
+            'ph.title':      'Use Cases',
+            'ph.sub':        'Real projects, told as they unfold &mdash; from deployed agents to bespoke benchmarks, we show the work in progress.',
+            'uc.label':      'On deck',
+            'uc.title':      'Our use cases',
+            'uc.note':       'One card per use case &mdash; diagnosis, fix and results documented end to end.',
+            'uc1.num':       '01 &mdash; Inference Engineering',
+            'uc1.title':     'Taming poolside Laguna S 2.1 looping',
+            'uc1.desc':      'Deploying poolside Laguna S 2.1 (118B MoE) on DGX Spark: 40% of runs spiralled into infinite reasoning loops. We diagnosed the "reasoning attractor" and fixed it with two vLLM parameters (repetition_penalty + native n-gram detection) &mdash; zero timeouts, 80% pass rate, one hour of compute saved per deployment.',
+            'uc1.tag1':      'Inference',
+            'uc1.tag2':      'vLLM',
+            'uc1.tag3':      'DGX Spark',
+            'cta.label':     'Got a project to launch?',
+            'cta.title':     'Let&rsquo;s talk about yours.',
+            'cta.body':      'Here to build your next use case &mdash;<br>from idea to deployment.',
+            'footer.tagline':'AI lab and independent agency. We help businesses chart their course in the age of artificial intelligence.',
+            'footer.col1':   'Services',
+            'footer.col2':   'Company',
+            'footer.col3':   'Connect &amp; Links',
+            'footer.about':  'About',
+            'footer.process':'Process',
+            'footer.usecases':'Use Cases',
+            'footer.contact':'Contact',
+            'footer.copyright':'&copy; 2025 Navis AI &mdash; All rights reserved.',
+            'footer.tagline2':'Sail your AI with us'
         },
         fr: {
             'nav.services':  'Services',
             'nav.about':     'À propos',
             'nav.process':   'Méthode',
             'nav.usecases':  'Cas d\'usage',
-            'nav.cta':       'Appareiller &rarr;',
-            'cs.eyebrow':    'Navis AI &middot; Cas d\'usage',
-            'cs.label':      'Cas d\'usage',
-            'cs.title':      'À venir.',
-            'cs.body':       'Nous mettons actuellement à jour cette page avec nos études de cas, nos retours terrain et nos contributions open source. Revenez bientôt.',
-            'cs.back':       '&larr; Retour à l\'accueil'
+            'nav.cta':       'Contact &rarr;',
+            'ph.eyebrow':    'Navis AI &middot; Cas d\'usage',
+            'ph.title':      'Cas d\'usage',
+            'ph.sub':        'Des projets concrets, racontés comme ils avancent &mdash; des agents déployés aux benchmarks sur mesure, on vous montre le travail en cours.',
+            'uc.label':      'Sur le pont',
+            'uc.title':      'Nos cas d\'usage',
+            'uc.note':       'Une carte par cas d\'usage &mdash; diagnostic, correctif et résultats documentés de bout en bout.',
+            'uc1.num':       '01 &mdash; Inference Engineering',
+            'uc1.title':     'Dompter le looping de poolside Laguna S 2.1',
+            'uc1.desc':      'Déploiement de poolside Laguna S 2.1 (118B MoE) sur DGX Spark : 40 % des runs bouclaient sans fin. Diagnostic d\'un « reasoning attractor », corrigé par deux paramètres vLLM (repetition_penalty + détection native d\'ngrammes) &mdash; 0 timeout, 80 % de passes, une heure de calcul économisée par déploiement.',
+            'uc1.tag1':      'Inference',
+            'uc1.tag2':      'vLLM',
+            'uc1.tag3':      'DGX Spark',
+            'cta.label':     'Un projet à mettre au large&nbsp;?',
+            'cta.title':     'Parlons du vôtre.',
+            'cta.body':      'À l\'écoute pour construire votre prochain cas d\'usage &mdash;<br>de l\'idée au déploiement.',
+            'footer.tagline':'Laboratoire IA et agence indépendante. Nous aidons les entreprises à tracer leur cap à l\'ère de l\'intelligence artificielle.',
+            'footer.col1':   'Services',
+            'footer.col2':   'Entreprise',
+            'footer.col3':   'Contact &amp; Liens',
+            'footer.about':  'À propos',
+            'footer.process':'Méthode',
+            'footer.usecases':'Cas d\'usage',
+            'footer.contact':'Contact',
+            'footer.copyright':'&copy; 2025 Navis AI &mdash; Tous droits réservés.',
+            'footer.tagline2':'Naviguez avec nous'
         }
     };
 
