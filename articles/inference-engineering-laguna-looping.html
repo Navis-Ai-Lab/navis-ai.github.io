@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How We Stopped Laguna S 2.1 From Looping Forever on Our DGX Spark — Navis AI</title>
+    <style>
+        *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+        /* ─── THEME TOKENS ─── */
+        :root {
+            --black: #0a0a0a;
+            --white: #f5f5f0;
+            --gray-mid: #888880;
+
+            --nav-bg: rgba(245,245,240,0.97);
+            --nav-border: rgba(10,10,10,0.08);
+            --grid-line: rgba(10,10,10,0.04);
+
+            --inv-08: rgba(245,245,240,0.08);
+            --inv-12: rgba(245,245,240,0.12);
+            --inv-25: rgba(245,245,240,0.25);
+            --inv-30: rgba(245,245,240,0.30);
+            --inv-35: rgba(245,245,240,0.35);
+            --inv-45: rgba(245,245,240,0.45);
+            --inv-55: rgba(245,245,240,0.55);
+            --inv-60: rgba(245,245,240,0.60);
+
+            --norm-18: rgba(10,10,10,0.18);
+
+            --post-body: #555550;
+            --code-bg: #0d0d0d;
+            --code-fg: #e8e8e0;
+            --tbl-border: rgba(10,10,10,0.15);
+        }
+
+        html.dark {
+            --black: #f5f5f0;
+            --white: #0a0a0a;
+            --gray-mid: #777770;
+
+            --nav-bg: rgba(10,10,10,0.98);
+            --nav-border: rgba(245,245,240,0.08);
+            --grid-line: rgba(245,245,240,0.04);
+
+            --inv-08: rgba(10,10,10,0.08);
+            --inv-12: rgba(10,10,10,0.12);
+            --inv-25: rgba(10,10,10,0.25);
+            --inv-30: rgba(10,10,10,0.30);
+            --inv-35: rgba(10,10,10,0.35);
+            --inv-45: rgba(10,10,10,0.45);
+            --inv-55: rgba(10,10,10,0.55);
+            --inv-60: rgba(10,10,10,0.60);
+
+            --norm-18: rgba(245,245,240,0.18);
+
+            --post-body: #aaaaa8;
+            --tbl-border: rgba(245,245,240,0.15);
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Georgia', serif;
+            background: var(--white);
+            color: var(--black);
+            overflow-x: hidden;
+            transition: background-color 0.45s ease, color 0.45s ease;
+        }
+
+        /* ─── NAV ─── */
+        nav {
+            position: fixed;
+            top: 0; width: 100%;
+            z-index: 100;
+            padding: 1.5rem 5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--nav-bg);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--nav-border);
+            transition: padding 0.3s ease, background-color 0.45s ease, border-color 0.45s ease;
+        }
+
+        nav.scrolled { padding: 1rem 5rem; }
+
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-decoration: none;
+            color: var(--black);
+            transition: color 0.45s ease;
+        }
+
+        .nav-logo-img { width: 44px; height: 44px; display: block; }
+        html:not(.dark) .nav-logo-img { content: url('../logos/navis-logo-light.png'); }
+
+        .nav-brand {
+            font-size: 1.1rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+
+        .nav-right { display: flex; align-items: center; gap: 2rem; }
+        .nav-links { display: flex; align-items: center; gap: 2.5rem; list-style: none; }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--black);
+            font-size: 0.8rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            position: relative;
+            padding-bottom: 3px;
+            font-family: 'Arial', sans-serif;
+            transition: color 0.45s ease;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0;
+            width: 0; height: 1px;
+            background: var(--black);
+            transition: width 0.3s ease, background-color 0.45s ease;
+        }
+
+        .nav-links a:hover::after { width: 100%; }
+        .nav-links a.active::after { width: 100%; }
+
+        .nav-cta {
+            background: var(--black) !important;
+            color: var(--white) !important;
+            height: 36px;
+            padding: 0 1.4rem;
+            display: inline-flex !important;
+            align-items: center;
+            border: 1.5px solid var(--black) !important;
+            transition: background 0.3s, color 0.3s, border-color 0.45s !important;
+        }
+
+        .nav-cta:hover { background: transparent !important; color: var(--black) !important; }
+        .nav-cta::after { display: none !important; }
+
+        .theme-toggle {
+            background: none;
+            border: 1.5px solid var(--black);
+            color: var(--black);
+            width: 36px; height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            flex-shrink: 0;
+            transition: background 0.3s, color 0.3s, border-color 0.45s;
+        }
+
+        .theme-toggle:hover { background: var(--black); color: var(--white); }
+
+        .icon-moon { display: none; }
+        html.dark .icon-sun  { display: none; }
+        html.dark .icon-moon { display: block; }
+
+        .lang-toggle {
+            background: none;
+            border: 1.5px solid var(--black);
+            color: var(--black);
+            height: 36px;
+            padding: 0 0.75rem;
+            cursor: pointer;
+            font-family: 'Arial', sans-serif;
+            font-size: 0.7rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            flex-shrink: 0;
+            transition: background 0.3s, color 0.3s, border-color 0.45s;
+        }
+
+        .lang-toggle:hover { background: var(--black); color: var(--white); }
+        .lang-toggle .show-fr { display: none; }
+        html.fr .lang-toggle .show-en { display: none; }
+        html.fr .lang-toggle .show-fr { display: inline; }
+
+        /* ─── POST HEADER ─── */
+        .post-hero {
+            min-height: 62vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 10rem 2rem 4rem;
+            position: relative;
+            overflow: hidden;
+            background: var(--white);
+            transition: background-color 0.45s ease;
+        }
+
+        .ph-grid {
+            position: absolute; inset: 0;
+            background-image:
+                linear-gradient(var(--grid-line) 1px, transparent 1px),
+                linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+            background-size: 72px 72px;
+        }
+
+        .ph-content { position: relative; z-index: 1; max-width: 860px; }
+
+        .ph-eyebrow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            font-family: 'Arial', sans-serif;
+            font-size: 0.72rem;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            color: var(--gray-mid);
+            margin-bottom: 2.5rem;
+        }
+
+        .ph-eyebrow::before, .ph-eyebrow::after {
+            content: '';
+            width: 50px; height: 1px;
+            background: var(--gray-mid);
+        }
+
+        .ph-title {
+            font-size: clamp(2rem, 5vw, 4rem);
+            line-height: 1.08;
+            letter-spacing: -0.02em;
+            font-weight: 900;
+            margin-bottom: 1.75rem;
+        }
+
+        .ph-meta {
+            font-family: 'Arial', sans-serif;
+            font-size: 0.72rem;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: var(--gray-mid);
+        }
+
+        /* ─── POST BODY ─── */
+        .post-body {
+            max-width: 780px;
+            margin: 0 auto;
+            padding: 0 2rem 5rem;
+            font-size: 1.15rem;
+            line-height: 1.85;
+            color: var(--post-body);
+            transition: color 0.45s ease;
+        }
+
+        .post-body h2 {
+            font-size: clamp(1.4rem, 2.4vw, 1.9rem);
+            line-height: 1.25;
+            letter-spacing: -0.01em;
+            color: var(--black);
+            margin: 4rem 0 1.25rem;
+            transition: color 0.45s ease;
+        }
+
+        .post-body h3 {
+            font-size: 1.25rem;
+            line-height: 1.3;
+            color: var(--black);
+            margin: 2.5rem 0 1rem;
+            transition: color 0.45s ease;
+        }
+
+        .post-body p { margin-bottom: 1.5rem; }
+
+        .post-body strong { color: var(--black); transition: color 0.45s ease; }
+
+        .post-body a {
+            color: var(--black);
+            transition: color 0.45s ease;
+        }
+
+        .post-body ul, .post-body ol {
+            margin: 0 0 1.5rem 1.4rem;
+        }
+
+        .post-body li { margin-bottom: 0.75rem; }
+
+        code {
+            font-family: 'Menlo', 'Consolas', monospace;
+            font-size: 0.85em;
+            background: var(--norm-18);
+            padding: 0.15em 0.4em;
+            color: var(--black);
+            transition: background-color 0.45s ease, color 0.45s ease;
+        }
+
+        pre {
+            background: var(--code-bg);
+            color: var(--code-fg);
+            font-family: 'Menlo', 'Consolas', monospace;
+            font-size: 0.82rem;
+            line-height: 1.7;
+            padding: 1.5rem 1.75rem;
+            margin: 2rem 0;
+            overflow-x: auto;
+            white-space: pre;
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            color: inherit;
+            font-size: inherit;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 2rem 0;
+            font-size: 0.95rem;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--tbl-border);
+            transition: border-color 0.45s ease;
+        }
+
+        th {
+            font-family: 'Arial', sans-serif;
+            font-size: 0.7rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--black);
+            border-bottom-width: 2px;
+            transition: color 0.45s ease;
+        }
+
+        td { text-align: right; }
+        td:first-child, th:first-child { text-align: left; }
+
+        blockquote {
+            border-left: 3px solid var(--black);
+            padding: 0.25rem 0 0.25rem 1.5rem;
+            margin: 2rem 0;
+            font-style: italic;
+            color: var(--post-body);
+            transition: border-color 0.45s ease;
+        }
+
+        .post-note {
+            margin-top: 4rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--norm-18);
+            font-size: 0.95rem;
+            line-height: 1.8;
+            font-style: italic;
+            color: var(--gray-mid);
+            transition: border-color 0.45s ease;
+        }
+
+        /* ─── BACK LINK ─── */
+        .post-back {
+            text-align: center;
+            padding: 2rem 2rem 5rem;
+        }
+
+        .btn {
+            font-family: 'Arial', sans-serif;
+            font-size: 0.78rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            padding: 1rem 2.5rem;
+            text-decoration: none;
+            display: inline-block;
+            border: 1.5px solid var(--black);
+            transition: background 0.3s, color 0.3s, border-color 0.45s;
+            cursor: pointer;
+        }
+
+        .btn-dark  { background: var(--black); color: var(--white); }
+        .btn-dark:hover  { background: transparent; color: var(--black); }
+
+        /* ─── FOOTER ─── */
+        footer {
+            background: var(--black);
+            color: var(--white);
+            padding: 5rem 5rem 3rem;
+            transition: background-color 0.45s ease, color 0.45s ease;
+        }
+
+        .footer-top {
+            max-width: 1200px; margin: 0 auto;
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 4rem;
+            padding-bottom: 3.5rem;
+            border-bottom: 1px solid var(--inv-08);
+            margin-bottom: 2.5rem;
+            transition: border-color 0.45s ease;
+        }
+
+        .footer-brand-name { font-size: 1.4rem; font-weight: 900; letter-spacing: 0.1em; margin-bottom: 1rem; }
+        .footer-tagline { font-size: 0.95rem; line-height: 1.7; color: var(--inv-35); max-width: 260px; }
+
+        .footer-address {
+            font-style: normal;
+            font-size: 0.82rem;
+            line-height: 1.7;
+            color: var(--inv-35);
+            margin-top: 1.25rem;
+            transition: color 0.45s ease;
+        }
+
+        .footer-col h4 {
+            font-size: 0.65rem;
+            letter-spacing: 0.25em;
+            text-transform: uppercase;
+            color: var(--inv-30);
+            margin-bottom: 1.5rem;
+        }
+
+        .footer-col ul { list-style: none; }
+        .footer-col ul li { margin-bottom: 0.7rem; }
+
+        .footer-col ul li a {
+            text-decoration: none;
+            color: var(--inv-55);
+            font-size: 0.88rem;
+            transition: color 0.2s;
+        }
+
+        .footer-col ul li a:hover { color: var(--white); }
+
+        .footer-bottom {
+            max-width: 1200px; margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.7rem;
+            letter-spacing: 0.08em;
+            color: var(--inv-25);
+        }
+
+        /* ─── BACK TO TOP ─── */
+        .back-to-top {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--black);
+            color: var(--white);
+            border: 1.5px solid var(--black);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 99;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(10px);
+            transition: opacity 0.3s ease, transform 0.3s ease, background 0.3s, color 0.3s, border-color 0.45s;
+        }
+
+        .back-to-top.visible {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateY(0);
+        }
+
+        .back-to-top:hover { background: transparent; color: var(--black); }
+
+        /* ─── RESPONSIVE ─── */
+        @media (max-width: 900px) {
+            nav, nav.scrolled { padding: 1.2rem 1.5rem; }
+            .nav-links { display: none; }
+            .post-body { padding: 0 1.5rem 4rem; }
+            footer { padding-left: 1.5rem; padding-right: 1.5rem; }
+            .footer-top { grid-template-columns: 1fr; gap: 2.5rem; }
+            .footer-bottom { flex-direction: column; gap: 0.75rem; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+
+<nav id="navbar">
+    <a href="../index.html" class="nav-logo">
+        <img src="../logos/navis-logo.png" class="nav-logo-img" alt="Navis AI">
+        <span class="nav-brand">Navis AI</span>
+    </a>
+    <div class="nav-right">
+        <ul class="nav-links">
+            <li><a href="../index.html#services" data-i18n="nav.services">Services</a></li>
+            <li><a href="../index.html#about" data-i18n="nav.about">About</a></li>
+            <li><a href="../index.html#process" data-i18n="nav.process">Process</a></li>
+            <li><a href="../use-cases.html" class="active" data-i18n="nav.usecases">Use Cases</a></li>
+            <li><a href="../index.html#contact" class="nav-cta" data-i18n="nav.cta">Set Sail &rarr;</a></li>
+        </ul>
+        <button class="lang-toggle" id="langToggle" aria-label="Changer de langue">
+            <span class="show-en">FR</span>
+            <span class="show-fr">EN</span>
+        </button>
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">
+            <svg class="icon-sun" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <circle cx="12" cy="12" r="4.5"/>
+                <line x1="12" y1="2"    x2="12" y2="4.5"/>
+                <line x1="12" y1="19.5" x2="12" y2="22"/>
+                <line x1="2"  y1="12"   x2="4.5" y2="12"/>
+                <line x1="19.5" y1="12" x2="22" y2="12"/>
+                <line x1="4.93" y1="4.93" x2="6.7"  y2="6.7"/>
+                <line x1="17.3" y1="17.3" x2="19.07" y2="19.07"/>
+                <line x1="4.93" y1="19.07" x2="6.7"  y2="17.3"/>
+                <line x1="17.3" y1="6.7"   x2="19.07" y2="4.93"/>
+            </svg>
+            <svg class="icon-moon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+            </svg>
+        </button>
+    </div>
+</nav>
+
+<!-- ═══════════════ POST HEADER ═══════════════ -->
+<header class="post-hero">
+    <div class="ph-grid"></div>
+    <div class="ph-content">
+        <div class="ph-eyebrow" data-i18n="post.eyebrow">Navis AI &middot; Inference Engineering</div>
+        <h1 class="ph-title">How We Stopped Laguna S 2.1 From Looping Forever on Our DGX Spark</h1>
+        <div class="ph-meta" data-i18n="post.meta">By Navis AI &middot; 6 min read &middot; Inference Engineering</div>
+    </div>
+</header>
+
+<!-- ═══════════════ POST BODY ═══════════════ -->
+<article class="post-body">
+
+    <p>We recently deployed Poolside's Laguna S 2.1 (118B MoE) on a DGX Spark. The model is impressive &mdash; 90% on our HumanEval-inspired coding benchmark, beating most cloud models in its weight class. But there was a catch: <strong>40% of runs on certain problems never finished.</strong></p>
+
+    <p>Not "took too long." Never. The model would enter a reasoning spiral &mdash; burning 50,000+ tokens, hitting HTTP timeouts at 30 minutes, consuming a full hour of compute for <em>two</em> runs that went nowhere.</p>
+
+    <p>Here's exactly what was happening, how we diagnosed it, and the two-line vLLM config that fixed it.</p>
+
+    <h2>The Symptom: Reasoning That Never Converges</h2>
+
+    <p>Laguna S 2.1 is a reasoning model. Before producing code, it thinks &mdash; often extensively. This is fine. What's not fine is when the thinking loops.</p>
+
+    <p>Take <code>make_palindrome</code>, a medium-difficulty coding problem (find the shortest palindrome starting from a given string). With the default vLLM deployment:</p>
+
+    <pre><code>Run 1: ✅ PASS —  374s, 13,033 tokens
+Run 2: ❌ TIMEOUT — 1,800s, 0 tokens (loop)
+Run 3: ❌ TIMEOUT — 1,800s, 0 tokens (loop)
+Run 4: ✅ PASS —  187s,  7,260 tokens
+Run 5: ✅ PASS —  215s,  7,710 tokens</code></pre>
+
+    <p><strong>Two out of five runs looped indefinitely.</strong> That's 3,600 seconds &mdash; one full hour &mdash; of GPU time producing nothing.</p>
+
+    <h2>The Root Cause: Deterministic Traps Without Stochastic Escape</h2>
+
+    <p>Reasoning models, especially MoE architectures like Laguna, can fall into what we call a <strong>reasoning attractor</strong> &mdash; a region of token-space where every plausible next token leads back to the same semantic loop. The model isn't "broken." It's just that the probability landscape for certain prompts creates a basin with no exit.</p>
+
+    <p>At <code>temperature = 0</code> (greedy decoding), this is fatal. The model picks the most likely token every time, marches into the basin, and never escapes.</p>
+
+    <p>At <code>temperature = 1.0</code> (the official checkpoint default for the NVFP4 variant), the model <em>can</em> escape stochastically &mdash; which is why some runs pass. But the variance is enormous. One run finishes in 187 seconds. The next one spirals for 30 minutes.</p>
+
+    <h2>The Fix: Two Lines in Your vLLM Config</h2>
+
+    <p>The solution is to give vLLM two tools it already has:</p>
+
+    <h3>1. Repetition Penalty</h3>
+
+    <pre><code>repetition_penalty: 1.15</code></pre>
+
+    <p>This applies a small penalty each time a token reappears. It's subtle enough not to hurt normal reasoning (the model <em>should</em> revisit concepts as it refines), but strong enough to break tight loops. We validated <code>1.15</code> against community reports on the exact same hardware configuration (DGX Spark, NVFP4 checkpoint).</p>
+
+    <h3>2. Native N-Gram Loop Detection</h3>
+
+    <pre><code>repetition_min_pattern_size: 8
+repetition_max_pattern_size: 24
+repetition_min_count: 3</code></pre>
+
+    <p>This is vLLM's built-in repetition detection (&ge; v0.17.0). It monitors the generated stream for n-grams of [8&ndash;24] tokens that appear &ge; 3 times. If detected, vLLM kills the generation at the scheduler level &mdash; no more waiting for an HTTP timeout.</p>
+
+    <p>The parameters are calibrated to match our earlier FastAPI-based loop detector, which we validated against hours of Laguna reasoning logs:</p>
+
+    <ul>
+        <li>8&ndash;24 tokens &asymp; 12 words (catches both verbatim and reformulated loops)</li>
+        <li>Threshold of 3 (the same n-gram must appear 3 times in close proximity)</li>
+        <li>Zero false positives on convergent reasoning (tested on 102K-character legitimate reasoning traces)</li>
+    </ul>
+
+    <h3>Full vLLM Override</h3>
+
+    <pre><code>--override-generation-config '{
+  "temperature": 0.7,
+  "top_p": 0.95,
+  "repetition_penalty": 1.15,
+  "repetition_detection": {
+    "min_pattern_size": 8,
+    "max_pattern_size": 24,
+    "min_count": 3
+  }
+}'</code></pre>
+
+    <p>We also switched from <code>temp = 0</code> to <code>temp = 0.7</code> with <code>top_p = 0.95</code>. This keeps outputs diverse enough to avoid the deterministic trap zone, while staying within Poolside's recommended sampling range.</p>
+
+    <h2>The Result</h2>
+
+    <p>Same problem, same hardware, five fresh runs:</p>
+
+    <pre><code>Run 1: ❌ (logic error, not a loop) —  362s,  8,479 tokens
+Run 2: ✅ PASS —                       712s, 16,986 tokens
+Run 3: ✅ PASS —                       489s, 11,501 tokens
+Run 4: ✅ PASS —                       502s, 12,352 tokens
+Run 5: ✅ PASS —                       517s, 12,376 tokens</code></pre>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Metric</th>
+                <th>Old Recipe</th>
+                <th>New Recipe</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr><td>Pass rate</td><td>60% (3/5)</td><td>80% (4/5)</td></tr>
+            <tr><td>Timeouts</td><td><strong>40%</strong></td><td><strong>0%</strong></td></tr>
+            <tr><td>Compute wasted</td><td>3,600s</td><td>0s</td></tr>
+            <tr><td>Avg time (passed runs)</td><td>259s</td><td>516s</td></tr>
+        </tbody>
+    </table>
+
+    <p>The average time <em>increased</em> &mdash; from 259s to 516s. This is actually a good sign. The old recipe's "fast" runs were lucky escapes from the attractor basin. The new recipe lets the model reason properly, exploring branches until it converges &mdash; without ever spiraling. The <code>repetition_detection</code> catches the spirals; the <code>repetition_penalty</code> prevents them from starting.</p>
+
+    <p><strong>Zero timeouts. Zero loops. One hour of wasted compute eliminated.</strong></p>
+
+    <h2>What We Learned</h2>
+
+    <ol>
+        <li><strong>Reasoning models need an escape hatch.</strong> Greedy decoding + complex prompts = attractor basins with no exit. Repetition penalty is your stochastic escape hatch.</li>
+        <li><strong>vLLM's native repetition detection works.</strong> You don't need a custom proxy with n-gram loop detection (we built one &mdash; it worked, but vLLM's built-in is simpler and runs at the scheduler level).</li>
+        <li><strong>Don't trust the checkpoint defaults blindly.</strong> The official config says <code>temp = 1.0, top_k = 20</code>. It works &mdash; but on a DGX Spark with NVFP4 quantization, <code>temp = 0.7, top_p = 0.95</code> is more stable. Test on your hardware.</li>
+        <li><strong>The "long generation = loop" heuristic is wrong.</strong> Some of our successful runs took 12 minutes and 17,000 tokens. They weren't looping &mdash; they were reasoning thoroughly. vLLM's n-gram detection distinguishes true loops from long reasoning. Don't just set a low timeout and call it a day.</li>
+    </ol>
+
+    <h2>Try It Yourself</h2>
+
+    <p>Full vLLM launch command for DGX Spark + Laguna S 2.1 NVFP4:</p>
+
+    <pre><code>vllm serve poolside/Laguna-S-2.1-NVFP4 \
+  --served-model-name poolside/Laguna-S-2.1 \
+  --max-model-len 262144 \
+  --max-num-batched-tokens 8192 \
+  --max-num-seqs 32 \
+  --gpu-memory-utilization 0.85 \
+  --enable-chunked-prefill \
+  --enable-prefix-caching \
+  --trust-remote-code \
+  --override-generation-config '{
+    "temperature": 0.7,
+    "top_p": 0.95,
+    "repetition_penalty": 1.15,
+    "repetition_detection": {
+      "min_pattern_size": 8,
+      "max_pattern_size": 24,
+      "min_count": 3
+    }
+  }'</code></pre>
+
+    <p>That's it. Two parameters. One hour of compute saved per deployment.</p>
+
+    <p class="post-note" data-i18n="post.note"><em>Navis AI is an AI research lab based in Monaco, building on-premise AI appliances. We benchmark and deploy open-weight models on local hardware. Follow us for more inference engineering battle stories.</em></p>
+
+</article>
+
+<!-- ═══════════════ BACK LINK ═══════════════ -->
+<div class="post-back">
+    <a href="../use-cases.html" class="btn btn-dark" data-i18n="post.back">&larr; Retour aux cas d'usage</a>
+</div>
+
+<!-- ═══════════════ FOOTER ═══════════════ -->
+<footer>
+    <div class="footer-top">
+        <div>
+            <div class="footer-brand-name">NAVIS AI</div>
+            <p class="footer-tagline" data-i18n="footer.tagline">AI lab and independent agency. We help businesses chart their course in the age of artificial intelligence.</p>
+            <address class="footer-address">
+                NOVAFFAIRES Business Center<br>
+                27 Bd de l'Ariane<br>
+                06300 Nice, France
+            </address>
+        </div>
+        <div class="footer-col">
+            <h4 data-i18n="footer.col1">Services</h4>
+            <ul>
+                <li><a href="../index.html#services">AI Agents</a></li>
+                <li><a href="../index.html#services">Custom RAG &amp; AI Workflow</a></li>
+                <li><a href="../index.html#services">Finetuning</a></li>
+                <li><a href="../index.html#services">Custom AI Benchmark</a></li>
+            </ul>
+        </div>
+        <div class="footer-col">
+            <h4 data-i18n="footer.col2">Company</h4>
+            <ul>
+                <li><a href="../index.html#about" data-i18n="footer.about">About</a></li>
+                <li><a href="../index.html#process" data-i18n="footer.process">Process</a></li>
+                <li><a href="../use-cases.html" data-i18n="footer.usecases">Use Cases</a></li>
+                <li><a href="../index.html#contact" data-i18n="footer.contact">Contact</a></li>
+            </ul>
+        </div>
+        <div class="footer-col">
+            <h4 data-i18n="footer.col3">Connect</h4>
+            <ul>
+                <li><a href="mailto:contact@navis-ai.com">contact@navis-ai.com</a></li>
+            </ul>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <span data-i18n="footer.copyright">&copy; 2025 Navis AI &mdash; All rights reserved.</span>
+        <span data-i18n="footer.tagline2">Sail your AI with us</span>
+    </div>
+</footer>
+
+<button class="back-to-top" id="backToTop" aria-label="Retour en haut">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="12" y1="19" x2="12" y2="5"/>
+        <polyline points="5 12 12 5 19 12"/>
+    </svg>
+</button>
+
+<script>
+    // ─── Nav scroll ───
+    const navbar = document.getElementById('navbar');
+    window.addEventListener('scroll', () => {
+        navbar.classList.toggle('scrolled', window.scrollY > 60);
+    });
+
+    // ─── Back to top ───
+    const backToTop = document.getElementById('backToTop');
+    window.addEventListener('scroll', () => {
+        backToTop.classList.toggle('visible', window.scrollY > 400);
+    });
+    backToTop.addEventListener('click', () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    // ─── Dark mode ───
+    const toggle = document.getElementById('themeToggle');
+    const html   = document.documentElement;
+
+    if (localStorage.getItem('navis-theme') !== 'light') html.classList.add('dark');
+
+    toggle.addEventListener('click', () => {
+        html.classList.toggle('dark');
+        localStorage.setItem('navis-theme', html.classList.contains('dark') ? 'dark' : 'light');
+    });
+
+    // ─── i18n ───
+    const T = {
+        en: {
+            'nav.services': 'Services',
+            'nav.about':    'About',
+            'nav.process':  'Process',
+            'nav.usecases': 'Use Cases',
+            'nav.cta':      'Set Sail &rarr;',
+            'post.eyebrow': 'Navis AI &middot; Inference Engineering',
+            'post.meta':    'By Navis AI &middot; 6 min read &middot; Inference Engineering',
+            'post.back':    '&larr; Back to use cases',
+            'post.note':    '<em>Navis AI is an AI research lab based in Monaco, building on-premise AI appliances. We benchmark and deploy open-weight models on local hardware. Follow us for more inference engineering battle stories.</em>',
+            'footer.tagline':'AI lab and independent agency. We help businesses chart their course in the age of artificial intelligence.',
+            'footer.col1':  'Services',
+            'footer.col2':  'Company',
+            'footer.col3':  'Connect',
+            'footer.about': 'About',
+            'footer.process':'Process',
+            'footer.usecases':'Use Cases',
+            'footer.contact':'Contact',
+            'footer.copyright':'&copy; 2025 Navis AI &mdash; All rights reserved.',
+            'footer.tagline2':'Sail your AI with us'
+        },
+        fr: {
+            'nav.services': 'Services',
+            'nav.about':    'À propos',
+            'nav.process':  'Méthode',
+            'nav.usecases': 'Cas d\'usage',
+            'nav.cta':      'Contact &rarr;',
+            'post.eyebrow': 'Navis AI &middot; Inference Engineering',
+            'post.meta':    'Par Navis AI &middot; 6 min de lecture &middot; Inference Engineering',
+            'post.back':    '&larr; Retour aux cas d\'usage',
+            'post.note':    '<em>Navis AI est un laboratoire de recherche IA basé à Monaco, spécialisé dans les appliances IA on-premise. Nous benchmarkons et déployons des modèles open-weight sur du matériel local. Suivez-nous pour d\'autres récits d\'ingénierie d\'inférence.</em>',
+            'footer.tagline':'Laboratoire IA et agence indépendante. Nous aidons les entreprises à tracer leur cap à l\'ère de l\'intelligence artificielle.',
+            'footer.col1':  'Services',
+            'footer.col2':  'Entreprise',
+            'footer.col3':  'Contact &amp; Liens',
+            'footer.about': 'À propos',
+            'footer.process':'Méthode',
+            'footer.usecases':'Cas d\'usage',
+            'footer.contact':'Contact',
+            'footer.copyright':'&copy; 2025 Navis AI &mdash; Tous droits réservés.',
+            'footer.tagline2':'Naviguez avec nous'
+        }
+    };
+
+    function setLang(code) {
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+            const v = T[code]?.[el.dataset.i18n];
+            if (v !== undefined) el.innerHTML = v;
+        });
+        document.documentElement.lang = code;
+        document.documentElement.classList.toggle('fr', code === 'fr');
+        localStorage.setItem('navis-lang', code);
+    }
+
+    const savedLang = localStorage.getItem('navis-lang');
+    setLang(savedLang || 'en');
+
+    document.getElementById('langToggle').addEventListener('click', () => {
+        setLang(document.documentElement.classList.contains('fr') ? 'en' : 'fr');
+    });
+</script>
+
+</body>
+</html>
