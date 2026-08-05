@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="fr" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>How We Stopped Laguna S 2.1 From Looping Forever on Our DGX Spark — Navis AI</title>
+    <title>Comment nous avons stoppé le looping de Laguna S 2.1 sur notre DGX Spark — Navis AI</title>
     <style>
         *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
 
@@ -531,7 +531,7 @@
     <div class="ph-grid"></div>
     <div class="ph-content">
         <div class="ph-eyebrow" data-i18n="post.eyebrow">Navis AI &middot; Inference Engineering</div>
-        <h1 class="ph-title">How We Stopped Laguna S 2.1 From Looping Forever on Our DGX Spark</h1>
+        <h1 class="ph-title" data-i18n="post.title">How We Stopped Laguna S 2.1 From Looping Forever on Our DGX Spark</h1>
         <div class="ph-meta" data-i18n="post.meta">By Navis AI &middot; 6 min read &middot; Inference Engineering</div>
     </div>
 </header>
@@ -539,17 +539,17 @@
 <!-- ═══════════════ POST BODY ═══════════════ -->
 <article class="post-body">
 
-    <p>We recently deployed Poolside's Laguna S 2.1 (118B MoE) on a DGX Spark. The model is impressive &mdash; 90% on our HumanEval-inspired coding benchmark, beating most cloud models in its weight class. But there was a catch: <strong>40% of runs on certain problems never finished.</strong></p>
+    <p data-i18n="b.intro1">We recently deployed Poolside's Laguna S 2.1 (118B MoE) on a DGX Spark. The model is impressive &mdash; 90% on our HumanEval-inspired coding benchmark, beating most cloud models in its weight class. But there was a catch: <strong>40% of runs on certain problems never finished.</strong></p>
 
-    <p>Not "took too long." Never. The model would enter a reasoning spiral &mdash; burning 50,000+ tokens, hitting HTTP timeouts at 30 minutes, consuming a full hour of compute for <em>two</em> runs that went nowhere.</p>
+    <p data-i18n="b.intro2">Not "took too long." Never. The model would enter a reasoning spiral &mdash; burning 50,000+ tokens, hitting HTTP timeouts at 30 minutes, consuming a full hour of compute for <em>two</em> runs that went nowhere.</p>
 
-    <p>Here's exactly what was happening, how we diagnosed it, and the two-line vLLM config that fixed it.</p>
+    <p data-i18n="b.intro3">Here's exactly what was happening, how we diagnosed it, and the two-line vLLM config that fixed it.</p>
 
-    <h2>The Symptom: Reasoning That Never Converges</h2>
+    <h2 data-i18n="b.sym.title">The Symptom: Reasoning That Never Converges</h2>
 
-    <p>Laguna S 2.1 is a reasoning model. Before producing code, it thinks &mdash; often extensively. This is fine. What's not fine is when the thinking loops.</p>
+    <p data-i18n="b.sym.p1">Laguna S 2.1 is a reasoning model. Before producing code, it thinks &mdash; often extensively. This is fine. What's not fine is when the thinking loops.</p>
 
-    <p>Take <code>make_palindrome</code>, a medium-difficulty coding problem (find the shortest palindrome starting from a given string). With the default vLLM deployment:</p>
+    <p data-i18n="b.sym.p2">Take <code>make_palindrome</code>, a medium-difficulty coding problem (find the shortest palindrome starting from a given string). With the default vLLM deployment:</p>
 
     <pre><code>Run 1: ✅ PASS —  374s, 13,033 tokens
 Run 2: ❌ TIMEOUT — 1,800s, 0 tokens (loop)
@@ -557,43 +557,43 @@ Run 3: ❌ TIMEOUT — 1,800s, 0 tokens (loop)
 Run 4: ✅ PASS —  187s,  7,260 tokens
 Run 5: ✅ PASS —  215s,  7,710 tokens</code></pre>
 
-    <p><strong>Two out of five runs looped indefinitely.</strong> That's 3,600 seconds &mdash; one full hour &mdash; of GPU time producing nothing.</p>
+    <p data-i18n="b.sym.p3"><strong>Two out of five runs looped indefinitely.</strong> That's 3,600 seconds &mdash; one full hour &mdash; of GPU time producing nothing.</p>
 
-    <h2>The Root Cause: Deterministic Traps Without Stochastic Escape</h2>
+    <h2 data-i18n="b.cause.title">The Root Cause: Deterministic Traps Without Stochastic Escape</h2>
 
-    <p>Reasoning models, especially MoE architectures like Laguna, can fall into what we call a <strong>reasoning attractor</strong> &mdash; a region of token-space where every plausible next token leads back to the same semantic loop. The model isn't "broken." It's just that the probability landscape for certain prompts creates a basin with no exit.</p>
+    <p data-i18n="b.cause.p1">Reasoning models, especially MoE architectures like Laguna, can fall into what we call a <strong>reasoning attractor</strong> &mdash; a region of token-space where every plausible next token leads back to the same semantic loop. The model isn't "broken." It's just that the probability landscape for certain prompts creates a basin with no exit.</p>
 
-    <p>At <code>temperature = 0</code> (greedy decoding), this is fatal. The model picks the most likely token every time, marches into the basin, and never escapes.</p>
+    <p data-i18n="b.cause.p2">At <code>temperature = 0</code> (greedy decoding), this is fatal. The model picks the most likely token every time, marches into the basin, and never escapes.</p>
 
-    <p>At <code>temperature = 1.0</code> (the official checkpoint default for the NVFP4 variant), the model <em>can</em> escape stochastically &mdash; which is why some runs pass. But the variance is enormous. One run finishes in 187 seconds. The next one spirals for 30 minutes.</p>
+    <p data-i18n="b.cause.p3">At <code>temperature = 1.0</code> (the official checkpoint default for the NVFP4 variant), the model <em>can</em> escape stochastically &mdash; which is why some runs pass. But the variance is enormous. One run finishes in 187 seconds. The next one spirals for 30 minutes.</p>
 
-    <h2>The Fix: Two Lines in Your vLLM Config</h2>
+    <h2 data-i18n="b.fix.title">The Fix: Two Lines in Your vLLM Config</h2>
 
-    <p>The solution is to give vLLM two tools it already has:</p>
+    <p data-i18n="b.fix.p1">The solution is to give vLLM two tools it already has:</p>
 
-    <h3>1. Repetition Penalty</h3>
+    <h3 data-i18n="b.fix1.title">1. Repetition Penalty</h3>
 
     <pre><code>repetition_penalty: 1.15</code></pre>
 
-    <p>This applies a small penalty each time a token reappears. It's subtle enough not to hurt normal reasoning (the model <em>should</em> revisit concepts as it refines), but strong enough to break tight loops. We validated <code>1.15</code> against community reports on the exact same hardware configuration (DGX Spark, NVFP4 checkpoint).</p>
+    <p data-i18n="b.fix1.p">This applies a small penalty each time a token reappears. It's subtle enough not to hurt normal reasoning (the model <em>should</em> revisit concepts as it refines), but strong enough to break tight loops. We validated <code>1.15</code> against community reports on the exact same hardware configuration (DGX Spark, NVFP4 checkpoint).</p>
 
-    <h3>2. Native N-Gram Loop Detection</h3>
+    <h3 data-i18n="b.fix2.title">2. Native N-Gram Loop Detection</h3>
 
     <pre><code>repetition_min_pattern_size: 8
 repetition_max_pattern_size: 24
 repetition_min_count: 3</code></pre>
 
-    <p>This is vLLM's built-in repetition detection (&ge; v0.17.0). It monitors the generated stream for n-grams of [8&ndash;24] tokens that appear &ge; 3 times. If detected, vLLM kills the generation at the scheduler level &mdash; no more waiting for an HTTP timeout.</p>
+    <p data-i18n="b.fix2.p1">This is vLLM's built-in repetition detection (&ge; v0.17.0). It monitors the generated stream for n-grams of [8&ndash;24] tokens that appear &ge; 3 times. If detected, vLLM kills the generation at the scheduler level &mdash; no more waiting for an HTTP timeout.</p>
 
-    <p>The parameters are calibrated to match our earlier FastAPI-based loop detector, which we validated against hours of Laguna reasoning logs:</p>
+    <p data-i18n="b.fix2.p2">The parameters are calibrated to match our earlier FastAPI-based loop detector, which we validated against hours of Laguna reasoning logs:</p>
 
     <ul>
-        <li>8&ndash;24 tokens &asymp; 12 words (catches both verbatim and reformulated loops)</li>
-        <li>Threshold of 3 (the same n-gram must appear 3 times in close proximity)</li>
-        <li>Zero false positives on convergent reasoning (tested on 102K-character legitimate reasoning traces)</li>
+        <li data-i18n="b.fix2.li1">8&ndash;24 tokens &asymp; 12 words (catches both verbatim and reformulated loops)</li>
+        <li data-i18n="b.fix2.li2">Threshold of 3 (the same n-gram must appear 3 times in close proximity)</li>
+        <li data-i18n="b.fix2.li3">Zero false positives on convergent reasoning (tested on 102K-character legitimate reasoning traces)</li>
     </ul>
 
-    <h3>Full vLLM Override</h3>
+    <h3 data-i18n="b.fix3.title">Full vLLM Override</h3>
 
     <pre><code>--override-generation-config '{
   "temperature": 0.7,
@@ -606,11 +606,11 @@ repetition_min_count: 3</code></pre>
   }
 }'</code></pre>
 
-    <p>We also switched from <code>temp = 0</code> to <code>temp = 0.7</code> with <code>top_p = 0.95</code>. This keeps outputs diverse enough to avoid the deterministic trap zone, while staying within Poolside's recommended sampling range.</p>
+    <p data-i18n="b.fix3.p">We also switched from <code>temp = 0</code> to <code>temp = 0.7</code> with <code>top_p = 0.95</code>. This keeps outputs diverse enough to avoid the deterministic trap zone, while staying within Poolside's recommended sampling range.</p>
 
-    <h2>The Result</h2>
+    <h2 data-i18n="b.result.title">The Result</h2>
 
-    <p>Same problem, same hardware, five fresh runs:</p>
+    <p data-i18n="b.result.p">Same problem, same hardware, five fresh runs:</p>
 
     <pre><code>Run 1: ❌ (logic error, not a loop) —  362s,  8,479 tokens
 Run 2: ✅ PASS —                       712s, 16,986 tokens
@@ -621,35 +621,35 @@ Run 5: ✅ PASS —                       517s, 12,376 tokens</code></pre>
     <table>
         <thead>
             <tr>
-                <th>Metric</th>
-                <th>Old Recipe</th>
-                <th>New Recipe</th>
+                <th data-i18n="b.tbl.metric">Metric</th>
+                <th data-i18n="b.tbl.old">Old Recipe</th>
+                <th data-i18n="b.tbl.new">New Recipe</th>
             </tr>
         </thead>
         <tbody>
-            <tr><td>Pass rate</td><td>60% (3/5)</td><td>80% (4/5)</td></tr>
-            <tr><td>Timeouts</td><td><strong>40%</strong></td><td><strong>0%</strong></td></tr>
-            <tr><td>Compute wasted</td><td>3,600s</td><td>0s</td></tr>
-            <tr><td>Avg time (passed runs)</td><td>259s</td><td>516s</td></tr>
+            <tr><td data-i18n="b.tbl.r1l">Pass rate</td><td data-i18n="b.tbl.r1o">60% (3/5)</td><td data-i18n="b.tbl.r1n">80% (4/5)</td></tr>
+            <tr><td data-i18n="b.tbl.r2l">Timeouts</td><td><strong data-i18n="b.tbl.r2o">40%</strong></td><td><strong data-i18n="b.tbl.r2n">0%</strong></td></tr>
+            <tr><td data-i18n="b.tbl.r3l">Compute wasted</td><td data-i18n="b.tbl.r3o">3,600s</td><td data-i18n="b.tbl.r3n">0s</td></tr>
+            <tr><td data-i18n="b.tbl.r4l">Avg time (passed runs)</td><td data-i18n="b.tbl.r4o">259s</td><td data-i18n="b.tbl.r4n">516s</td></tr>
         </tbody>
     </table>
 
-    <p>The average time <em>increased</em> &mdash; from 259s to 516s. This is actually a good sign. The old recipe's "fast" runs were lucky escapes from the attractor basin. The new recipe lets the model reason properly, exploring branches until it converges &mdash; without ever spiraling. The <code>repetition_detection</code> catches the spirals; the <code>repetition_penalty</code> prevents them from starting.</p>
+    <p data-i18n="b.result.p2">The average time <em>increased</em> &mdash; from 259s to 516s. This is actually a good sign. The old recipe's "fast" runs were lucky escapes from the attractor basin. The new recipe lets the model reason properly, exploring branches until it converges &mdash; without ever spiraling. The <code>repetition_detection</code> catches the spirals; the <code>repetition_penalty</code> prevents them from starting.</p>
 
-    <p><strong>Zero timeouts. Zero loops. One hour of wasted compute eliminated.</strong></p>
+    <p data-i18n="b.result.p3"><strong>Zero timeouts. Zero loops. One hour of wasted compute eliminated.</strong></p>
 
-    <h2>What We Learned</h2>
+    <h2 data-i18n="b.learned.title">What We Learned</h2>
 
     <ol>
-        <li><strong>Reasoning models need an escape hatch.</strong> Greedy decoding + complex prompts = attractor basins with no exit. Repetition penalty is your stochastic escape hatch.</li>
-        <li><strong>vLLM's native repetition detection works.</strong> You don't need a custom proxy with n-gram loop detection (we built one &mdash; it worked, but vLLM's built-in is simpler and runs at the scheduler level).</li>
-        <li><strong>Don't trust the checkpoint defaults blindly.</strong> The official config says <code>temp = 1.0, top_k = 20</code>. It works &mdash; but on a DGX Spark with NVFP4 quantization, <code>temp = 0.7, top_p = 0.95</code> is more stable. Test on your hardware.</li>
-        <li><strong>The "long generation = loop" heuristic is wrong.</strong> Some of our successful runs took 12 minutes and 17,000 tokens. They weren't looping &mdash; they were reasoning thoroughly. vLLM's n-gram detection distinguishes true loops from long reasoning. Don't just set a low timeout and call it a day.</li>
+        <li data-i18n="b.learned.li1"><strong>Reasoning models need an escape hatch.</strong> Greedy decoding + complex prompts = attractor basins with no exit. Repetition penalty is your stochastic escape hatch.</li>
+        <li data-i18n="b.learned.li2"><strong>vLLM's native repetition detection works.</strong> You don't need a custom proxy with n-gram loop detection (we built one &mdash; it worked, but vLLM's built-in is simpler and runs at the scheduler level).</li>
+        <li data-i18n="b.learned.li3"><strong>Don't trust the checkpoint defaults blindly.</strong> The official config says <code>temp = 1.0, top_k = 20</code>. It works &mdash; but on a DGX Spark with NVFP4 quantization, <code>temp = 0.7, top_p = 0.95</code> is more stable. Test on your hardware.</li>
+        <li data-i18n="b.learned.li4"><strong>The "long generation = loop" heuristic is wrong.</strong> Some of our successful runs took 12 minutes and 17,000 tokens. They weren't looping &mdash; they were reasoning thoroughly. vLLM's n-gram detection distinguishes true loops from long reasoning. Don't just set a low timeout and call it a day.</li>
     </ol>
 
-    <h2>Try It Yourself</h2>
+    <h2 data-i18n="b.try.title">Try It Yourself</h2>
 
-    <p>Full vLLM launch command for DGX Spark + Laguna S 2.1 NVFP4:</p>
+    <p data-i18n="b.try.p">Full vLLM launch command for DGX Spark + Laguna S 2.1 NVFP4:</p>
 
     <pre><code>vllm serve poolside/Laguna-S-2.1-NVFP4 \
   --served-model-name poolside/Laguna-S-2.1 \
@@ -671,7 +671,7 @@ Run 5: ✅ PASS —                       517s, 12,376 tokens</code></pre>
     }
   }'</code></pre>
 
-    <p>That's it. Two parameters. One hour of compute saved per deployment.</p>
+    <p data-i18n="b.try.last">That's it. Two parameters. One hour of compute saved per deployment.</p>
 
     <p class="post-note" data-i18n="post.note"><em>Navis AI is an AI research lab based in Monaco, building on-premise AI appliances. We benchmark and deploy open-weight models on local hardware. Follow us for more inference engineering battle stories.</em></p>
 
@@ -768,9 +768,60 @@ Run 5: ✅ PASS —                       517s, 12,376 tokens</code></pre>
             'nav.usecases': 'Use Cases',
             'nav.cta':      'Set Sail &rarr;',
             'post.eyebrow': 'Navis AI &middot; Inference Engineering',
+            'post.title':   'How We Stopped Laguna S 2.1 From Looping Forever on Our DGX Spark',
             'post.meta':    'By Navis AI &middot; 6 min read &middot; Inference Engineering',
             'post.back':    '&larr; Back to use cases',
             'post.note':    '<em>Navis AI is an AI research lab based in Monaco, building on-premise AI appliances. We benchmark and deploy open-weight models on local hardware. Follow us for more inference engineering battle stories.</em>',
+            'b.intro1':     'We recently deployed Poolside\'s Laguna S 2.1 (118B MoE) on a DGX Spark. The model is impressive &mdash; 90% on our HumanEval-inspired coding benchmark, beating most cloud models in its weight class. But there was a catch: <strong>40% of runs on certain problems never finished.</strong>',
+            'b.intro2':     'Not "took too long." Never. The model would enter a reasoning spiral &mdash; burning 50,000+ tokens, hitting HTTP timeouts at 30 minutes, consuming a full hour of compute for <em>two</em> runs that went nowhere.',
+            'b.intro3':     'Here\'s exactly what was happening, how we diagnosed it, and the two-line vLLM config that fixed it.',
+            'b.sym.title':  'The Symptom: Reasoning That Never Converges',
+            'b.sym.p1':     'Laguna S 2.1 is a reasoning model. Before producing code, it thinks &mdash; often extensively. This is fine. What\'s not fine is when the thinking loops.',
+            'b.sym.p2':     'Take <code>make_palindrome</code>, a medium-difficulty coding problem (find the shortest palindrome starting from a given string). With the default vLLM deployment:',
+            'b.sym.p3':     '<strong>Two out of five runs looped indefinitely.</strong> That\'s 3,600 seconds &mdash; one full hour &mdash; of GPU time producing nothing.',
+            'b.cause.title':'The Root Cause: Deterministic Traps Without Stochastic Escape',
+            'b.cause.p1':   'Reasoning models, especially MoE architectures like Laguna, can fall into what we call a <strong>reasoning attractor</strong> &mdash; a region of token-space where every plausible next token leads back to the same semantic loop. The model isn\'t "broken." It\'s just that the probability landscape for certain prompts creates a basin with no exit.',
+            'b.cause.p2':   'At <code>temperature = 0</code> (greedy decoding), this is fatal. The model picks the most likely token every time, marches into the basin, and never escapes.',
+            'b.cause.p3':   'At <code>temperature = 1.0</code> (the official checkpoint default for the NVFP4 variant), the model <em>can</em> escape stochastically &mdash; which is why some runs pass. But the variance is enormous. One run finishes in 187 seconds. The next one spirals for 30 minutes.',
+            'b.fix.title':  'The Fix: Two Lines in Your vLLM Config',
+            'b.fix.p1':     'The solution is to give vLLM two tools it already has:',
+            'b.fix1.title': '1. Repetition Penalty',
+            'b.fix1.p':     'This applies a small penalty each time a token reappears. It\'s subtle enough not to hurt normal reasoning (the model <em>should</em> revisit concepts as it refines), but strong enough to break tight loops. We validated <code>1.15</code> against community reports on the exact same hardware configuration (DGX Spark, NVFP4 checkpoint).',
+            'b.fix2.title': '2. Native N-Gram Loop Detection',
+            'b.fix2.p1':    'This is vLLM\'s built-in repetition detection (&ge; v0.17.0). It monitors the generated stream for n-grams of [8&ndash;24] tokens that appear &ge; 3 times. If detected, vLLM kills the generation at the scheduler level &mdash; no more waiting for an HTTP timeout.',
+            'b.fix2.p2':    'The parameters are calibrated to match our earlier FastAPI-based loop detector, which we validated against hours of Laguna reasoning logs:',
+            'b.fix2.li1':   '8&ndash;24 tokens &asymp; 12 words (catches both verbatim and reformulated loops)',
+            'b.fix2.li2':   'Threshold of 3 (the same n-gram must appear 3 times in close proximity)',
+            'b.fix2.li3':   'Zero false positives on convergent reasoning (tested on 102K-character legitimate reasoning traces)',
+            'b.fix3.title': 'Full vLLM Override',
+            'b.fix3.p':     'We also switched from <code>temp = 0</code> to <code>temp = 0.7</code> with <code>top_p = 0.95</code>. This keeps outputs diverse enough to avoid the deterministic trap zone, while staying within Poolside\'s recommended sampling range.',
+            'b.result.title':'The Result',
+            'b.result.p':   'Same problem, same hardware, five fresh runs:',
+            'b.tbl.metric': 'Metric',
+            'b.tbl.old':    'Old Recipe',
+            'b.tbl.new':    'New Recipe',
+            'b.tbl.r1l':    'Pass rate',
+            'b.tbl.r1o':    '60% (3/5)',
+            'b.tbl.r1n':    '80% (4/5)',
+            'b.tbl.r2l':    'Timeouts',
+            'b.tbl.r2o':    '<strong>40%</strong>',
+            'b.tbl.r2n':    '<strong>0%</strong>',
+            'b.tbl.r3l':    'Compute wasted',
+            'b.tbl.r3o':    '3,600s',
+            'b.tbl.r3n':    '0s',
+            'b.tbl.r4l':    'Avg time (passed runs)',
+            'b.tbl.r4o':    '259s',
+            'b.tbl.r4n':    '516s',
+            'b.result.p2':  'The average time <em>increased</em> &mdash; from 259s to 516s. This is actually a good sign. The old recipe\'s "fast" runs were lucky escapes from the attractor basin. The new recipe lets the model reason properly, exploring branches until it converges &mdash; without ever spiraling. The <code>repetition_detection</code> catches the spirals; the <code>repetition_penalty</code> prevents them from starting.',
+            'b.result.p3':  '<strong>Zero timeouts. Zero loops. One hour of wasted compute eliminated.</strong>',
+            'b.learned.title':'What We Learned',
+            'b.learned.li1':'<strong>Reasoning models need an escape hatch.</strong> Greedy decoding + complex prompts = attractor basins with no exit. Repetition penalty is your stochastic escape hatch.',
+            'b.learned.li2':'<strong>vLLM\'s native repetition detection works.</strong> You don\'t need a custom proxy with n-gram loop detection (we built one &mdash; it worked, but vLLM\'s built-in is simpler and runs at the scheduler level).',
+            'b.learned.li3':'<strong>Don\'t trust the checkpoint defaults blindly.</strong> The official config says <code>temp = 1.0, top_k = 20</code>. It works &mdash; but on a DGX Spark with NVFP4 quantization, <code>temp = 0.7, top_p = 0.95</code> is more stable. Test on your hardware.',
+            'b.learned.li4':'<strong>The "long generation = loop" heuristic is wrong.</strong> Some of our successful runs took 12 minutes and 17,000 tokens. They weren\'t looping &mdash; they were reasoning thoroughly. vLLM\'s n-gram detection distinguishes true loops from long reasoning. Don\'t just set a low timeout and call it a day.',
+            'b.try.title':  'Try It Yourself',
+            'b.try.p':      'Full vLLM launch command for DGX Spark + Laguna S 2.1 NVFP4:',
+            'b.try.last':   'That\'s it. Two parameters. One hour of compute saved per deployment.',
             'footer.tagline':'AI lab and independent agency. We help businesses chart their course in the age of artificial intelligence.',
             'footer.col1':  'Services',
             'footer.col2':  'Company',
@@ -789,9 +840,60 @@ Run 5: ✅ PASS —                       517s, 12,376 tokens</code></pre>
             'nav.usecases': 'Cas d\'usage',
             'nav.cta':      'Contact &rarr;',
             'post.eyebrow': 'Navis AI &middot; Inference Engineering',
+            'post.title':   'Comment nous avons stoppé le looping de Laguna S 2.1 sur notre DGX Spark',
             'post.meta':    'Par Navis AI &middot; 6 min de lecture &middot; Inference Engineering',
             'post.back':    '&larr; Retour aux cas d\'usage',
             'post.note':    '<em>Navis AI est un laboratoire de recherche IA basé à Monaco, spécialisé dans les appliances IA on-premise. Nous benchmarkons et déployons des modèles open-weight sur du matériel local. Suivez-nous pour d\'autres récits d\'ingénierie d\'inférence.</em>',
+            'b.intro1':     'Nous avons récemment déployé poolside Laguna S 2.1 (118B MoE) sur un DGX Spark. Le modèle est impressionnant &mdash; 90 % sur notre benchmark de code inspiré de HumanEval, battant la plupart des modèles cloud dans sa catégorie. Mais il y avait un hic : <strong>40 % des runs sur certains problèmes ne finissaient jamais.</strong>',
+            'b.intro2':     'Pas « ça prenait trop de temps ». Jamais. Le modèle entrait dans une spirale de raisonnement &mdash; brûlant 50 000+ tokens, atteignant les timeouts HTTP à 30 minutes, consommant une heure entière de calcul pour <em>deux</em> runs qui n\'aboutissaient à rien.',
+            'b.intro3':     'Voici exactement ce qui se passait, comment nous l\'avons diagnostiqué, et la configuration vLLM en deux lignes qui a résolu le problème.',
+            'b.sym.title':  'Le symptôme : un raisonnement qui ne converge jamais',
+            'b.sym.p1':     'Laguna S 2.1 est un modèle de raisonnement. Avant de produire du code, il réfléchit &mdash; souvent longuement. C\'est normal. Ce qui ne l\'est pas, c\'est quand la réflexion boucle.',
+            'b.sym.p2':     'Prenons <code>make_palindrome</code>, un problème de code de difficulté moyenne (trouver le plus court palindrome partant d\'une chaîne donnée). Avec le déploiement vLLM par défaut :',
+            'b.sym.p3':     '<strong>Deux runs sur cinq bouclaient indéfiniment.</strong> Soit 3 600 secondes &mdash; une heure complète &mdash; de temps GPU sans produire quoi que ce soit.',
+            'b.cause.title':'La cause racine : des pièges déterministes sans échappatoire stochastique',
+            'b.cause.p1':   'Les modèles de raisonnement, surtout les architectures MoE comme Laguna, peuvent tomber dans ce que nous appelons un <strong>reasoning attractor</strong> &mdash; une région de l\'espace des tokens où chaque token plausible ramène à la même boucle sémantique. Le modèle n\'est pas « cassé ». C\'est juste que le paysage de probabilités de certains prompts crée un bassin sans issue.',
+            'b.cause.p2':   'À <code>temperature = 0</code> (décodage glouton), c\'est fatal. Le modèle choisit le token le plus probable à chaque fois, marche dans le bassin, et n\'en ressort jamais.',
+            'b.cause.p3':   'À <code>temperature = 1.0</code> (défaut officiel du checkpoint pour la variante NVFP4), le modèle <em>peut</em> s\'échapper stochastiquement &mdash; c\'est pourquoi certains runs passent. Mais la variance est énorme. Un run se termine en 187 secondes. Le suivant spirale pendant 30 minutes.',
+            'b.fix.title':  'Le correctif : deux lignes dans votre config vLLM',
+            'b.fix.p1':     'La solution est de donner à vLLM deux outils qu\'il possède déjà :',
+            'b.fix1.title': '1. Repetition Penalty',
+            'b.fix1.p':     'Cela applique une petite pénalité chaque fois qu\'un token réapparaît. C\'est assez subtil pour ne pas nuire au raisonnement normal (le modèle <em>doit</em> revisiter des concepts en affinant), mais assez fort pour briser les boucles serrées. Nous avons validé <code>1.15</code> contre des retours communautaires sur la configuration matérielle exactement identique (DGX Spark, checkpoint NVFP4).',
+            'b.fix2.title': '2. Détection native de boucles par n-grammes',
+            'b.fix2.p1':    'C\'est la détection de répétition intégrée à vLLM (&ge; v0.17.0). Elle surveille le flux généré pour des n-grammes de [8&ndash;24] tokens apparaissant &ge; 3 fois. Si détecté, vLLM tue la génération au niveau du scheduler &mdash; plus besoin d\'attendre un timeout HTTP.',
+            'b.fix2.p2':    'Les paramètres sont calibrés pour correspondre à notre précédent détecteur de boucles FastAPI, validé contre des heures de logs de raisonnement Laguna :',
+            'b.fix2.li1':   '8&ndash;24 tokens &asymp; 12 mots (attrape à la fois les boucles verbatim et reformulées)',
+            'b.fix2.li2':   'Seuil de 3 (le même n-gramme doit apparaître 3 fois à proximité)',
+            'b.fix2.li3':   'Zéro faux positif sur le raisonnement convergent (testé sur 102K caractères de traces de raisonnement légitimes)',
+            'b.fix3.title': 'Override complet vLLM',
+            'b.fix3.p':     'Nous avons aussi remplacé <code>temp = 0</code> par <code>temp = 0.7</code> avec <code>top_p = 0.95</code>. Cela garde des sorties assez diverses pour éviter la zone piège déterministe, tout en restant dans la plage de sampling recommandée par poolside.',
+            'b.result.title':'Le résultat',
+            'b.result.p':   'Même problème, même matériel, cinq nouveaux runs :',
+            'b.tbl.metric': 'Métrique',
+            'b.tbl.old':    'Ancienne recette',
+            'b.tbl.new':    'Nouvelle recette',
+            'b.tbl.r1l':    'Taux de réussite',
+            'b.tbl.r1o':    '60 % (3/5)',
+            'b.tbl.r1n':    '80 % (4/5)',
+            'b.tbl.r2l':    'Timeouts',
+            'b.tbl.r2o':    '<strong>40 %</strong>',
+            'b.tbl.r2n':    '<strong>0 %</strong>',
+            'b.tbl.r3l':    'Calcul gaspillé',
+            'b.tbl.r3o':    '3 600s',
+            'b.tbl.r3n':    '0s',
+            'b.tbl.r4l':    'Temps moyen (runs réussis)',
+            'b.tbl.r4o':    '259s',
+            'b.tbl.r4n':    '516s',
+            'b.result.p2':  'Le temps moyen a <em>augmenté</em> &mdash; de 259s à 516s. C\'est en fait un bon signe. Les runs « rapides » de l\'ancienne recette étaient des échappatoires chanceuses du bassin attracteur. La nouvelle recette laisse le modèle raisonner correctement, explorer les branches jusqu\'à convergence &mdash; sans jamais spiraler. La <code>repetition_detection</code> attrape les spirales ; la <code>repetition_penalty</code> les empêche de démarrer.',
+            'b.result.p3':  '<strong>Zéro timeout. Zéro boucle. Une heure de calcul gaspillée éliminée.</strong>',
+            'b.learned.title':'Ce que nous avons appris',
+            'b.learned.li1':'<strong>Les modèles de raisonnement ont besoin d\'une échappatoire.</strong> Décodage glouton + prompts complexes = bassins attracteurs sans issue. La repetition penalty est votre échappatoire stochastique.',
+            'b.learned.li2':'<strong>La détection de répétition native de vLLM fonctionne.</strong> Pas besoin d\'un proxy custom avec détection de boucles par n-grammes (nous en avons construit un &mdash; il fonctionnait, mais celui de vLLM est plus simple et tourne au niveau du scheduler).',
+            'b.learned.li3':'<strong>Ne faites pas confiance aveuglément aux défauts du checkpoint.</strong> La config officielle dit <code>temp = 1.0, top_k = 20</code>. Ça marche &mdash; mais sur un DGX Spark avec quantification NVFP4, <code>temp = 0.7, top_p = 0.95</code> est plus stable. Testez sur votre matériel.',
+            'b.learned.li4':'<strong>L\'heuristique « génération longue = boucle » est fausse.</strong> Certains de nos runs réussis ont pris 12 minutes et 17 000 tokens. Ils ne bouclaient pas &mdash; ils raisonnaient en profondeur. La détection par n-grammes de vLLM distingue les vraies boucles du raisonnement long. Ne vous contentez pas de mettre un timeout bas.',
+            'b.try.title':  'Essayez vous-même',
+            'b.try.p':      'Commande de lancement vLLM complète pour DGX Spark + Laguna S 2.1 NVFP4 :',
+            'b.try.last':   'C\'est tout. Deux paramètres. Une heure de calcul économisée par déploiement.',
             'footer.tagline':'Laboratoire IA et agence indépendante. Nous aidons les entreprises à tracer leur cap à l\'ère de l\'intelligence artificielle.',
             'footer.col1':  'Services',
             'footer.col2':  'Entreprise',
@@ -816,7 +918,7 @@ Run 5: ✅ PASS —                       517s, 12,376 tokens</code></pre>
     }
 
     const savedLang = localStorage.getItem('navis-lang');
-    setLang(savedLang || 'en');
+    setLang(savedLang || 'fr');
 
     document.getElementById('langToggle').addEventListener('click', () => {
         setLang(document.documentElement.classList.contains('fr') ? 'en' : 'fr');

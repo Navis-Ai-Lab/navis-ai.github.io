@@ -283,15 +283,6 @@
             margin-bottom: 1.5rem;
         }
 
-        .uc-note {
-            font-family: 'Arial', sans-serif;
-            font-size: 0.95rem;
-            color: var(--gray-mid);
-            max-width: 280px;
-            line-height: 1.6;
-            text-align: right;
-        }
-
         .uc-grid {
             display: grid;
             grid-template-columns: 1fr;
@@ -555,7 +546,6 @@
             .nav-links { display: none; }
             .usecases, .cta, footer { padding-left: 1.5rem; padding-right: 1.5rem; }
             .uc-header { flex-direction: column; align-items: flex-start; gap: 1rem; }
-            .uc-note { text-align: left; }
             .footer-top { grid-template-columns: 1fr; gap: 2.5rem; }
             .footer-bottom { flex-direction: column; gap: 0.75rem; text-align: center; }
         }
@@ -617,14 +607,13 @@
                 <p class="label label-dark" data-i18n="uc.label">Sur le pont</p>
                 <h2 class="section-title" data-i18n="uc.title">Nos cas d'usage</h2>
             </div>
-            <p class="uc-note" data-i18n="uc.note">Une carte par cas d'usage &mdash; diagnostic, correctif et résultats documentés de bout en bout.</p>
         </div>
 
         <div class="uc-grid">
             <a href="articles/inference-engineering-laguna-looping.html" class="card fade-up">
                 <img src="logos/poolside-logomark.svg" alt="poolside" class="card-icon-img">
                 <div class="card-num" data-i18n="uc1.num">01 &mdash; Inference Engineering</div>
-                <h3 class="card-title" data-i18n="uc1.title">Dompter le looping de poolside Laguna S 2.1</h3>
+                <h3 class="card-title" data-i18n="uc1.title">Comment nous avons stoppé le looping de Laguna S 2.1 sur notre DGX Spark</h3>
                 <p class="card-desc" data-i18n="uc1.desc">Déploiement de poolside Laguna S 2.1 (118B MoE) sur DGX Spark : 40 % des runs bouclaient sans fin. Diagnostic d'un « reasoning attractor », corrigé par deux paramètres vLLM (repetition_penalty + détection native d'ngrammes) &mdash; 0 timeout, 80 % de passes, une heure de calcul économisée par déploiement.</p>
                 <div class="card-tags">
                     <span class="tag" data-i18n="uc1.tag1">Inference</span>
@@ -745,9 +734,8 @@
             'ph.sub':        'Real projects, told as they unfold &mdash; from deployed agents to bespoke benchmarks, we show the work in progress.',
             'uc.label':      'On deck',
             'uc.title':      'Our use cases',
-            'uc.note':       'One card per use case &mdash; diagnosis, fix and results documented end to end.',
             'uc1.num':       '01 &mdash; Inference Engineering',
-            'uc1.title':     'Taming poolside Laguna S 2.1 looping',
+            'uc1.title':     'How We Stopped Laguna S 2.1 From Looping Forever on Our DGX Spark',
             'uc1.desc':      'Deploying poolside Laguna S 2.1 (118B MoE) on DGX Spark: 40% of runs spiralled into infinite reasoning loops. We diagnosed the "reasoning attractor" and fixed it with two vLLM parameters (repetition_penalty + native n-gram detection) &mdash; zero timeouts, 80% pass rate, one hour of compute saved per deployment.',
             'uc1.tag1':      'Inference',
             'uc1.tag2':      'vLLM',
@@ -777,9 +765,8 @@
             'ph.sub':        'Des projets concrets, racontés comme ils avancent &mdash; des agents déployés aux benchmarks sur mesure, on vous montre le travail en cours.',
             'uc.label':      'Sur le pont',
             'uc.title':      'Nos cas d\'usage',
-            'uc.note':       'Une carte par cas d\'usage &mdash; diagnostic, correctif et résultats documentés de bout en bout.',
             'uc1.num':       '01 &mdash; Inference Engineering',
-            'uc1.title':     'Dompter le looping de poolside Laguna S 2.1',
+            'uc1.title':     'Comment nous avons stoppé le looping de Laguna S 2.1 sur notre DGX Spark',
             'uc1.desc':      'Déploiement de poolside Laguna S 2.1 (118B MoE) sur DGX Spark : 40 % des runs bouclaient sans fin. Diagnostic d\'un « reasoning attractor », corrigé par deux paramètres vLLM (repetition_penalty + détection native d\'ngrammes) &mdash; 0 timeout, 80 % de passes, une heure de calcul économisée par déploiement.',
             'uc1.tag1':      'Inference',
             'uc1.tag2':      'vLLM',
