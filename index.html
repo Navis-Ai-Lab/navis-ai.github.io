@@ -4,10 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Navis AI — Sail Your AI Journey</title>
-    <link rel="icon" type="image/png" href="logos/navis-logo.png">
-    <meta property="og:image" content="logos/navis-logo.png">
-    <meta property="og:title" content="Navis AI — Sail Your AI Journey">
-    <meta property="og:type" content="website">
     <style>
         *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
 
@@ -687,13 +683,6 @@
             margin-top: 2.5rem;
         }
 
-        .team-members {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 2rem;
-            margin-top: 2.5rem;
-        }
-
         .founder-photo {
             width: 110px;
             height: 110px;
@@ -865,7 +854,6 @@
             .footer-top { grid-template-columns: 1fr; gap: 2.5rem; }
             .footer-bottom { flex-direction: column; gap: 0.75rem; text-align: center; }
             .founder-card { flex-direction: column; gap: 1.5rem; }
-            .team-members { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -960,7 +948,6 @@
     <!-- Team -->
     <div class="about-team">
         <p class="label label-light" data-i18n="about.team.label">Notre équipe</p>
-        <div class="team-members">
         <div class="founder-card fade-up">
             <div class="founder-photo">
                 <img src="remi.jpeg" alt="Rémi Giraud">
@@ -976,23 +963,6 @@
                     LinkedIn
                 </a>
             </div>
-        </div>
-        <div class="founder-card fade-up">
-            <div class="founder-photo">
-                <img src="shanley.jpeg" alt="Shanley">
-            </div>
-            <div>
-                <div class="founder-name">Shanley</div>
-                <div class="founder-role" data-i18n="about.team.shanley.role">Stagiaire AI Architect</div>
-                <p class="founder-bio" data-i18n="about.team.shanley.bio">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.</p>
-                <a href="https://www.linkedin.com/in/shanleon/" class="founder-linkedin" target="_blank" rel="noopener">
-                    <svg viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
-                    </svg>
-                    LinkedIn
-                </a>
-            </div>
-        </div>
         </div>
     </div>
 
@@ -1174,9 +1144,9 @@
             <div class="footer-brand-name">NAVIS AI</div>
             <p class="footer-tagline" data-i18n="footer.tagline">Independent AI consultancy. We help businesses chart their course in the age of artificial intelligence.</p>
             <address class="footer-address">
-                NOVAFFAIRES Business Center<br>
-                27 Bd de l'Ariane<br>
-                06300 Nice, France
+                Monaco Boost<br>
+                4/6 avenue Albert II, Zone F – Entrée B – 7ème étage<br>
+                98000 Monaco
             </address>
         </div>
         <div class="footer-col">
@@ -1276,8 +1246,6 @@
             'about.stat4.lbl': 'Possibilities',
             'about.team.label': 'Our Team',
             'about.certs.label': 'Certified by AI Leaders',
-            'about.team.shanley.role': 'AI Architect Intern',
-            'about.team.shanley.bio': 'Trained at 42 school, Shanley learned to code the way you learn to swim: by jumping in the deep end. From low-level C to cloud architectures, full-stack and DevOps, he has forged a deliberately cross-disciplinary profile through technical projects and industry experience. Currently completing his end-of-studies internship at Navis AI to earn his RNCP Level 7 diploma in Digital Technology Architecture (Master\'s degree equivalent), he works on designing AI agents, developing RAG pipelines, fine-tuning language models, and deploying solutions on sovereign on-premise infrastructure.',
             'about.team.founder.role': 'Founder &amp; AI Solutions Architect',
             'about.team.founder.bio': 'With 6 years across the tech stack — from full-stack development to AWS cloud engineering and MLOps — Rémi was the Founding Engineer of a startup specialising in time series using Machine Learning, incubated at Station F, before turning his focus to designing automated end-to-end data pipelines — from ingestion to training — and developing custom generative AI solutions. Certified across multiple AI frameworks (NVIDIA ecosystem, LangChain, Anthropic Academy), he is an active open source contributor and a specialist in on-premise AI infrastructure and the GB10 ecosystem.',
             'services.label': 'What we do',
@@ -1355,8 +1323,6 @@
             'about.stat4.lbl': 'Possibilités',
             'about.team.label': 'Notre équipe',
             'about.certs.label': 'Certifiés par les Leaders de l\'IA',
-            'about.team.shanley.role': 'Stagiaire AI Architect',
-            'about.team.shanley.bio': "Formé à l'école 42 Shanley a appris à coder comme on apprend à nager : en sautant dans le grand bain. Du C bas niveau aux architectures cloud en passant par le full-stack et le DevOps, il s\'est forgé un profil volontairement transversal à travers projets techniques et expériences en entreprise. Actuellement en stage de fin d\'études chez Navis AI pour valider son diplôme d\'Architecte en technologies du numérique (RNCP niveau 7 — Bac+5), il intervient sur la conception d\'agents IA, le développement de pipelines RAG, le fine-tuning de modèles de langage et le déploiement de solutions sur infrastructure souveraine on-premise.",
             'about.team.founder.role': 'Fondateur &amp; AI Solutions Architect',
             'about.team.founder.bio': 'Fort de 6 ans d\'expérience dans la tech — du full-stack au cloud AWS, puis au MLOps — Rémi a été Founding Engineer d\'une startup spécialisée dans les séries temporelles utilisant du Machine Learning, incubée à Station F, avant de se consacrer à la conception de pipelines de données automatisés — de l\'ingestion à l\'entraînement — et au développement de solutions d\'IA générative sur mesure. Certifié sur de multiples frameworks IA (écosystème NVIDIA, LangChain, Anthropic Academy), il est contributeur open source actif et spécialiste des infrastructures IA on-premise et de l\'écosystème GB10.',
             'services.label': 'Ce que nous faisons',
