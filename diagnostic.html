@@ -354,16 +354,8 @@
         <div class="hero-logo">
             <img src="logos/navis-logo.png" alt="Navis AI">
         </div>
-        <p class="hero-eyebrow">Diagnostic IA &middot; Offert</p>
-        <h1>Où l'IA peut-elle<br>servir votre métier&nbsp;?</h1>
-        <p class="hero-sub">
-            Répondez à quelques questions : nous analysons votre situation et vous recevons un diagnostic IA personnalisé par email — où l'IA crée de la valeur chez vous, et où elle n'en crée pas.
-        </p>
-        <div class="hero-pills">
-            <span class="hero-pill">Sans engagement</span>
-            <span class="hero-pill">Réponse sous 48h</span>
-            <span class="hero-pill">Vos données restent les vôtres</span>
-        </div>
+        <p class="hero-eyebrow">Diagnostic IA</p>
+        <h1>Recevez votre<br>Diagnostic IA</h1>
     </div>
 </section>
 
@@ -420,8 +412,8 @@
                 <p class="form-hint">Optionnel — mais ça nous aide à préparer un diagnostic plus précis.</p>
             </div>
 
-            <!-- Honeypot anti-spam -->
-            <input type="text" name="_honey" class="hp-field" tabindex="-1" autocomplete="off">
+            <!-- Honeypot anti-spam (nom standard Web3Forms : filtré côté service) -->
+            <input type="text" name="botcheck" class="hp-field" tabindex="-1" autocomplete="off">
 
             <button type="submit" class="btn" id="submitBtn">Recevoir mon diagnostic IA</button>
             <p class="form-note">
@@ -466,9 +458,8 @@
 
 <script>
     // ─── Web3Forms ───
-    // ⚠️ À remplacer par votre clé d'accès : https://web3forms.com
-    // (se créer un compte avec contact@navis-ai.fr, la clé est affichée dans le dashboard)
-    const WEB3FORMS_ACCESS_KEY = 'VOTRE_CLE_WEB3FORMS_ICI';
+    // Clé d'accès : https://web3forms.com (compte contact@navis-ai.fr)
+    const WEB3FORMS_ACCESS_KEY = '9a04c481-1a73-4a0b-b9ea-d029e3fb09bf';
 
     // ─── Dark mode (cohérent avec le reste du site) ───
     if (localStorage.getItem('navis-theme') !== 'light') {
@@ -510,16 +501,22 @@
 
         try {
             // Web3Forms : https://web3forms.com (clé d'accès créée avec contact@navis-ai.fr)
-            const data = new FormData(form);
-            data.append('access_key', WEB3FORMS_ACCESS_KEY);
-            data.append('subject', 'Diagnostic IA — Nouvelle demande');
-            data.append('from_name', 'Navis AI — Diagnostic IA');
-            // Origine : page diagnostic scannée via QR code
-            data.append('Origine', 'QR code — page diagnostic');
+            // Envoi en JSON (UTF-8) pour que les accents passent correctement
+            const fields = Object.fromEntries(new FormData(form).entries());
+            const payload = {
+                access_key: WEB3FORMS_ACCESS_KEY,
+                subject: 'Diagnostic IA — Nouvelle demande',
+                from_name: 'Navis AI — Diagnostic IA',
+                ...fields,
+                // Origine : page diagnostic scannée via QR code
+                'Origine': 'QR code — page diagnostic',
+            };
+            delete payload.botcheck;
 
             const res = await fetch('https://api.web3forms.com/submit', {
                 method: 'POST',
-                body: data,
+                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                body: JSON.stringify(payload),
             });
 
             const json = await res.json();
