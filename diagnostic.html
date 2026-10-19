@@ -273,6 +273,9 @@
             width: 0;
         }
 
+        .captcha-group { display: flex; flex-direction: column; align-items: center; }
+        .captcha-error { color: #c0392b; font-style: normal; }
+
         /* ─── ÉTATS ─── */
         .form-state { display: none; text-align: center; padding: 2rem 0; }
         .form-state.visible { display: block; }
@@ -415,6 +418,12 @@
             <!-- Honeypot anti-spam (nom standard Web3Forms : filtré côté service) -->
             <input type="text" name="botcheck" class="hp-field" tabindex="-1" autocomplete="off">
 
+            <!-- hCaptcha (géré par le script Web3Forms) -->
+            <div class="form-group captcha-group">
+                <div class="h-captcha" data-captcha="true"></div>
+                <p class="form-hint captcha-error" id="captchaError" hidden>Merci de cocher la case anti-robot.</p>
+            </div>
+
             <button type="submit" class="btn" id="submitBtn">Recevoir mon diagnostic IA</button>
             <p class="form-note">
                 En soumettant ce formulaire, vous acceptez que Navis AI vous recontacte au sujet de votre diagnostic. Aucune donnée n'est partagée avec des tiers.
@@ -466,7 +475,11 @@
         document.documentElement.classList.add('dark');
     }
 
-    // ─── Envoi du formulaire via FormSubmit (sans backend) ───
+    // Thème du captcha aligné sur le thème du site (avant le chargement du script Web3Forms)
+    document.querySelector('.h-captcha').dataset.theme =
+        document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+
+    // ─── Envoi du formulaire via Web3Forms (sans backend) ───
     const form   = document.getElementById('diagForm');
     const states = {
         form:     form,
@@ -481,8 +494,15 @@
         });
     }
 
+    const captchaError = document.getElementById('captchaError');
+
+    function resetCaptcha() {
+        if (window.hcaptcha) { try { window.hcaptcha.reset(); } catch (_) {} }
+    }
+
     function resetForm() {
         form.reset();
+        resetCaptcha();
         showState('form');
     }
 
@@ -495,14 +515,26 @@
             return;
         }
 
+        // Web3Forms : https://web3forms.com (clé d'accès créée avec contact@navis-ai.fr)
+        // Envoi en JSON (UTF-8) pour que les accents passent correctement.
+        // FormData inclut aussi le jeton hCaptcha (champ « h-captcha-response »).
+        const fields = Object.fromEntries(new FormData(form).entries());
+
+        // Honeypot rempli = bot : on simule un succès sans rien envoyer
+        if (fields.botcheck) { showState('success'); return; }
+
+        // hCaptcha obligatoire
+        if (!fields['h-captcha-response']) {
+            captchaError.hidden = false;
+            return;
+        }
+        captchaError.hidden = true;
+
         const btn = document.getElementById('submitBtn');
         btn.disabled = true;
         showState('sending');
 
         try {
-            // Web3Forms : https://web3forms.com (clé d'accès créée avec contact@navis-ai.fr)
-            // Envoi en JSON (UTF-8) pour que les accents passent correctement
-            const fields = Object.fromEntries(new FormData(form).entries());
             const payload = {
                 access_key: WEB3FORMS_ACCESS_KEY,
                 subject: 'Diagnostic IA — Nouvelle demande',
@@ -511,7 +543,6 @@
                 // Origine : page diagnostic scannée via QR code
                 'Origine': 'QR code — page diagnostic',
             };
-            delete payload.botcheck;
 
             const res = await fetch('https://api.web3forms.com/submit', {
                 method: 'POST',
@@ -523,12 +554,17 @@
             if (!res.ok || !json.success) throw new Error(json.message || 'HTTP ' + res.status);
             showState('success');
         } catch (err) {
+            // Un jeton hCaptcha ne sert qu'une fois : on le réinitialise pour le prochain essai
+            resetCaptcha();
             showState('error');
         } finally {
             btn.disabled = false;
         }
     });
 </script>
+
+<!-- Web3Forms : affiche le hCaptcha dans .h-captcha -->
+<script src="https://web3forms.com/client/script.js" async defer></script>
 
 </body>
 </html>
